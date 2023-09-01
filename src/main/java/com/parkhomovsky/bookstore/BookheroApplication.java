@@ -1,13 +1,13 @@
-package com.parrkhomovsky.bookstore;
+package com.parkhomovsky.bookstore;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class BookstoreApplication {
+public class BookheroApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BookstoreApplication.class, args);
+        SpringApplication.run(BookheroApplication.class, args);
     }
 
 }
