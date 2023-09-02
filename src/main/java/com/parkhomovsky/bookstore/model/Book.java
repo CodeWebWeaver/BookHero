@@ -15,18 +15,18 @@ import lombok.Data;
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id")
+    @Column(name = "id")
     private Long id;
-    @Column(name = "Title", nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
-    @Column(name = "Author", nullable = false)
+    @Column(name = "author", nullable = false)
     private String author;
-    @Column(name = "ISBN",nullable = false, unique = true)
+    @Column(name = "isbn",nullable = false, unique = true)
     private String isbn;
-    @Column(name = "Price", nullable = false)
+    @Column(name = "price", nullable = false)
     private BigDecimal price;
-    @Column(name = "Description")
+    @Column(name = "description")
     private String description;
-    @Column(name = "Image")
+    @Column(name = "cover_image")
     private String coverImage;
 }
