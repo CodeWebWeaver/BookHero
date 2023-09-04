@@ -3,6 +3,7 @@ package com.parkhomovsky.bookstore.repository.implementation;
 import com.parkhomovsky.bookstore.model.Book;
 import com.parkhomovsky.bookstore.repository.BookRepository;
 import java.util.List;
+import java.util.Optional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -47,7 +48,21 @@ public class BookRepositoryImpl implements BookRepository {
             Query<Book> allBooksQuery = session.createQuery("from Book", Book.class);
             return allBooksQuery.getResultList();
         } catch (Exception e) {
-            throw new RuntimeException("Failed during getting all books", e);
+            throw new RuntimeException("Failed during gathering all books", e);
+        }
+    }
+
+    @Override
+    public Optional<Book> findById(Long id) {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            return Optional.ofNullable(session.find(Book.class, id));
+        } catch (Exception e) {
+            if (session != null) {
+                session.close();
+            }
+            throw new RuntimeException("Error due searching book with id: " + id);
         }
     }
 }

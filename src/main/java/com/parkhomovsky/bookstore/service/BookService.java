@@ -1,10 +1,13 @@
 package com.parkhomovsky.bookstore.service;
 
-import com.parkhomovsky.bookstore.model.Book;
+import com.parkhomovsky.bookstore.dto.BookDto;
+import com.parkhomovsky.bookstore.dto.CreateBookRequestDto;
 import java.util.List;
 
 public interface BookService {
-    Book create(Book book);
+    BookDto create(CreateBookRequestDto book);
 
-    List<Book> getAll();
+    List<BookDto> getAll();
+
+    BookDto getBookById(Long id);
 }
