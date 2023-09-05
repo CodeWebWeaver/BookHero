@@ -45,7 +45,7 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public List<Book> findAll() {
         try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
-            TypedQuery<Book> allBooksQuery = entityManager.createQuery("from Book", Book.class);
+            TypedQuery<Book> allBooksQuery = entityManager.createQuery("FROM Book", Book.class);
             return allBooksQuery.getResultList();
         } catch (Exception e) {
             throw new RuntimeException("Failed during gathering all books", e);
