@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: insertBooks
+      author: aleksandrparkhomovsky@gmail.com
+      changes:
+        - insert:
+            tableName: books
+            columns:
+              - column:
+                  name: title
+                  value: "Test Book"
+              - column:
+                  name: author
+                  value: "Test Author"
+              - column:
+                  name: isbn
+                  value: "1315616"
+              - column:
+                  name: price
+                  value: "14.56"
+              - column:
+                  name: description
+                  value: "Test book description"
+              - column:
+                  name: cover_image
+                  value: "URL"
+              - column:
+                  name: is_deleted
+                  valueBoolean: "false"
