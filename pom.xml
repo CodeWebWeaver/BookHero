@@ -8,7 +8,7 @@
         <version>3.1.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.balako</groupId>
+    <groupId>com.parkhomovsky</groupId>
     <artifactId>Online-Book-Store</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Online-Book-Store</name>
