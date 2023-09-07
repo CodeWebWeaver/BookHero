@@ -27,7 +27,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull HttpHeaders headers,
             @NonNull HttpStatusCode status,
             @NonNull WebRequest request
-     ) {
+    ) {
         Map<String, Object> body = new LinkedMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.BAD_REQUEST);
@@ -39,14 +39,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleDuplicateISBN(DataIntegrityViolationException ex) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex); // Використовуйте apache commons-lang3, щоб отримати кореневу причину
+    public ResponseEntity<Object> handleUniqueDataDuplicate(
+            DataIntegrityViolationException ex
+    ) {
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
         String errorMessage = "An error occurred while processing the request.";
         if (rootCause != null) {
             errorMessage = "Error: " + rootCause.getMessage();
         }
         return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
     }
+
     private String getErrorMessage(ObjectError ex) {
         if (ex instanceof FieldError) {
             String field = ((FieldError) ex).getField();
