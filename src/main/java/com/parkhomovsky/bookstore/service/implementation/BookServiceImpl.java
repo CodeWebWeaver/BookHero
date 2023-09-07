@@ -10,8 +10,8 @@ import com.parkhomovsky.bookstore.repository.book.BookRepository;
 import com.parkhomovsky.bookstore.repository.book.BookSpecificationBuilder;
 import com.parkhomovsky.bookstore.service.BookService;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +26,6 @@ public class BookServiceImpl implements BookService {
     public BookDto create(CreateBookRequestDto book) {
         Book model = bookMapper.toModel(book);
         return bookMapper.toDto(bookRepository.save(model));
-    }
-
-    @Override
-    public List<BookDto> getAll() {
-        return bookRepository.findAll().stream()
-                .map(bookMapper::toDto)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -60,5 +53,13 @@ public class BookServiceImpl implements BookService {
         Book newBook = bookMapper.toModel(bookRequestDto);
         newBook.setId(id);
         return bookMapper.toDto(bookRepository.save(newBook));
+    }
+
+    @Override
+    public List<BookDto> getAll(Pageable pageable) {
+        return bookRepository.findAll(pageable)
+                .stream()
+                .map(bookMapper::toDto)
+                .toList();
     }
 }
