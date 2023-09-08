@@ -24,6 +24,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String TIMESTAMP = "timestamp";
     private static final String STATUS = "status";
     private static final String ERROR = "error";
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
