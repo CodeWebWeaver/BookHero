@@ -1,6 +1,6 @@
 package com.parkhomovsky.bookstore.repository.book;
 
-import com.parkhomovsky.bookstore.dto.BookSearchParameters;
+import com.parkhomovsky.bookstore.dto.book.BookSearchParameters;
 import com.parkhomovsky.bookstore.model.Book;
 import com.parkhomovsky.bookstore.repository.SpecificationBuilder;
 import com.parkhomovsky.bookstore.repository.SpecificationProviderManager;

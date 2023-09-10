@@ -1,8 +1,8 @@
 package com.parkhomovsky.bookstore.service.implementation;
 
-import com.parkhomovsky.bookstore.dto.BookDto;
-import com.parkhomovsky.bookstore.dto.BookSearchParameters;
-import com.parkhomovsky.bookstore.dto.CreateBookRequestDto;
+import com.parkhomovsky.bookstore.dto.book.BookDto;
+import com.parkhomovsky.bookstore.dto.book.BookSearchParameters;
+import com.parkhomovsky.bookstore.dto.book.CreateBookRequestDto;
 import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
 import com.parkhomovsky.bookstore.mapper.BookMapper;
 import com.parkhomovsky.bookstore.model.Book;
@@ -29,7 +29,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDto getBookById(Long id) {
+    public BookDto getById(Long id) {
         Book book = bookRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Can`t find any book with id: " + id));
         return bookMapper.toDto(book);
@@ -41,7 +41,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> bookSearch(BookSearchParameters parameters) {
+    public List<BookDto> search(BookSearchParameters parameters) {
         Specification<Book> bookSpecification = bookSpecificationBuilder.build(parameters);
         return bookRepository.findAll(bookSpecification).stream()
                 .map(bookMapper::toDto)

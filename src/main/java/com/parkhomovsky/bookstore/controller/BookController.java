@@ -1,8 +1,8 @@
 package com.parkhomovsky.bookstore.controller;
 
-import com.parkhomovsky.bookstore.dto.BookDto;
-import com.parkhomovsky.bookstore.dto.BookSearchParameters;
-import com.parkhomovsky.bookstore.dto.CreateBookRequestDto;
+import com.parkhomovsky.bookstore.dto.book.BookDto;
+import com.parkhomovsky.bookstore.dto.book.BookSearchParameters;
+import com.parkhomovsky.bookstore.dto.book.CreateBookRequestDto;
 import com.parkhomovsky.bookstore.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,14 +49,14 @@ public class BookController {
     @Operation(summary = "Get book by ID",
             description = "Retrieve a book by its unique ID.")
     public BookDto getBookById(@PathVariable Long id) {
-        return bookService.getBookById(id);
+        return bookService.getById(id);
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search books",
             description = "Search for books by title or author.")
     public List<BookDto> search(BookSearchParameters parameters) {
-        return bookService.bookSearch(parameters);
+        return bookService.search(parameters);
     }
 
     @GetMapping
