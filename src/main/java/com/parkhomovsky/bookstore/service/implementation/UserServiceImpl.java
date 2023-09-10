@@ -12,6 +12,7 @@ import com.parkhomovsky.bookstore.repository.user.UserRepository;
 import com.parkhomovsky.bookstore.service.UserService;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,6 +21,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserRegistrationResponseDto register(UserRegistrationRequestDto request) {
@@ -29,7 +31,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toModel(request);
         Role role = roleRepository.getByName(RoleName.ROLE_USER);
         user.setRoles(Set.of(role));
-        User savedUser = userRepository.save(user);
-        return userMapper.toRegistrationResponse(savedUser);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        return userMapper.toRegistrationResponse(userRepository.save(user));
     }
 }
