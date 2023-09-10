@@ -1,6 +1,8 @@
 package com.parkhomovsky.bookstore.exception;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
@@ -61,5 +63,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             return defaultMessage + " for " + field;
         }
         return ex.getDefaultMessage();
+    }
+
+    @ExceptionHandler({RegistrationException.class})
+    protected ResponseEntity<Object> handleRegistrationException(
+            RegistrationException ex
+    ) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST);
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    protected ResponseEntity<Object> handleAccessDeniedException(
+            AccessDeniedException ex
+    ) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST);
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 }

@@ -9,6 +9,7 @@ import org.mapstruct.Mapper;
 
 @Mapper(config = MapperConfiguration.class)
 public interface UserMapper {
+
     UserRegistrationResponseDto toRegistrationResponse(User user);
 
     UserLoginResponseDto toLoginResponse(User user);

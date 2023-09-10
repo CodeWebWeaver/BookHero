@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,17 +19,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final int TOKEN_START_INDEX = 7;
     private static final String TOKEN_START = "Bearer ";
-    private static final String AUTHORIZATION_HEADER = "Authorization";
+
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         String token = getToken(request);
         if (token != null && jwtUtil.isValidToken(token)) {
