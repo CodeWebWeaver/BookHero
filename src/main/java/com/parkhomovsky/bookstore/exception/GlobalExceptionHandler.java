@@ -56,15 +56,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
     }
 
-    private String getErrorMessage(ObjectError ex) {
-        if (ex instanceof FieldError) {
-            String field = ((FieldError) ex).getField();
-            String defaultMessage = ex.getDefaultMessage();
-            return defaultMessage + " for " + field;
-        }
-        return ex.getDefaultMessage();
-    }
-
     @ExceptionHandler({RegistrationException.class})
     protected ResponseEntity<Object> handleRegistrationException(
             RegistrationException ex
@@ -85,5 +76,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", HttpStatus.BAD_REQUEST);
         body.put("error", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    private String getErrorMessage(ObjectError ex) {
+        if (ex instanceof FieldError) {
+            String field = ((FieldError) ex).getField();
+            String defaultMessage = ex.getDefaultMessage();
+            return defaultMessage + " for " + field;
+        }
+        return ex.getDefaultMessage();
     }
 }
