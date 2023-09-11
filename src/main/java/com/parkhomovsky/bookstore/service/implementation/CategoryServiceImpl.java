@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+
     @Override
     public CategoryDto create(CategoryRequestDto categoryRequestDto) {
         Category category = categoryMapper.toModel(categoryRequestDto);
@@ -38,7 +39,8 @@ public class CategoryServiceImpl implements CategoryService {
             updateCategory.setId(id);
             return categoryMapper.toDto(categoryRepository.save(updateCategory));
         }
-        throw new EntityNotFoundException("Can`t find any category with id: " + id + " during update");
+        throw new EntityNotFoundException("Can`t find any category with id: "
+                + id + " during update");
     }
 
     @Override
@@ -54,6 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (optionalCategory.isPresent()) {
             return categoryMapper.toDto(optionalCategory.get());
         }
-        throw new EntityNotFoundException("Can`t find any category with id: " + id + " during getById");
+        throw new EntityNotFoundException("Can`t find any category with id: "
+                + id + " during getById");
     }
 }
