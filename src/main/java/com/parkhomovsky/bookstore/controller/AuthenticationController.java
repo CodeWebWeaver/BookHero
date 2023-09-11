@@ -7,6 +7,8 @@ import com.parkhomovsky.bookstore.dto.user.UserRegistrationResponseDto;
 import com.parkhomovsky.bookstore.exception.RegistrationException;
 import com.parkhomovsky.bookstore.service.AuthenticationService;
 import com.parkhomovsky.bookstore.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -20,11 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping("/auth")
+@Tag(name = "User auth",
+        description = "Register or authenticate User")
 public class AuthenticationController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
+    @Operation(summary = "Login",
+            description = "Authenticate user in system")
     public UserLoginResponseDto login(
             @RequestBody @Valid UserLoginRequestDto requestDto
     ) {
@@ -32,6 +38,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Register",
+            description = "Register user in system")
     @ResponseBody
     public UserRegistrationResponseDto register(
             @RequestBody @Valid UserRegistrationRequestDto requestDto
