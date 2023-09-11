@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,8 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final int TOKEN_START_INDEX = 7;
-    private static final String TOKEN_START = "Bearer ";
+    private static final String TOKEN_PREFIX = "Bearer ";
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
@@ -32,9 +32,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String token = getToken(request);
-        if (token != null && jwtUtil.isValidToken(token)) {
-            String username = jwtUtil.getUsername(token);
+        Optional<String> token = extractToken(request);
+        if (token.isPresent() && jwtUtil.isValidToken(token.get())) {
+            String username = jwtUtil.getUsername(token.get());
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()
@@ -44,11 +44,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String getToken(HttpServletRequest request) {
+    private Optional<String> extractToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(TOKEN_START)) {
-            return bearerToken.substring(TOKEN_START_INDEX);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(TOKEN_PREFIX)) {
+            return Optional.of(bearerToken.substring(TOKEN_PREFIX.length()));
         }
-        return null;
+        return Optional.empty();
     }
 }
