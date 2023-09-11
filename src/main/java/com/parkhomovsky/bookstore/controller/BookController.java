@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/books")
 @Tag(name = "Book management",
         description = "Endpoints for managing products")
@@ -31,26 +31,17 @@ public class BookController {
     private final BookService bookService;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping("/{id}")
-    @Operation(summary = "Update Book Details",
-            description = "Update the details of an existing book.")
-    public BookDto update(
-            @PathVariable Long id, @RequestBody @Valid CreateBookRequestDto createBookRequestDto) {
-        return bookService.update(id, createBookRequestDto);
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new book",
-            description = "Create a new book and add it to the database.")
+            description = "Create a new book and add it to the database")
     public BookDto createBook(@RequestBody @Valid CreateBookRequestDto book) {
         return bookService.create(book);
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get book by ID",
-            description = "Retrieve a book by its unique ID.")
+    @Operation(summary = "Get book by id",
+            description = "Retrieve a book by its unique id.")
     public BookDto getBookById(@PathVariable Long id) {
         return bookService.getById(id);
     }
@@ -67,6 +58,15 @@ public class BookController {
             description = "List books with pagination using.")
     public List<BookDto> findAll(Pageable pageable) {
         return bookService.getAll(pageable);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/{id}")
+    @Operation(summary = "Update Book Details",
+            description = "Update the details of an existing book.")
+    public BookDto update(
+            @PathVariable Long id, @RequestBody @Valid CreateBookRequestDto createBookRequestDto) {
+        return bookService.update(id, createBookRequestDto);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
