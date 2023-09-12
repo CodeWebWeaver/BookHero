@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/auth")
 @Tag(name = "User auth",
-        description = "Register or authenticate User")
+        description = "Register or authenticate user")
 public class AuthenticationController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
