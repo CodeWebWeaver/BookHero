@@ -19,6 +19,8 @@ public interface BookMapper {
 
     Book toEntity(CreateBookRequestDto bookDto);
 
+    BookDtoWithoutCategoryIds toDtoWithoutCategories(Book book);
+
     @AfterMapping
     default void setCategoryIds(@MappingTarget BookDto bookDto, Book book) {
         Set<Long> categoryIds = book.getCategories().stream()
@@ -32,17 +34,5 @@ public interface BookMapper {
         Book book = new Book();
         book.setId(id);
         return book;
-    }
-
-    default BookDtoWithoutCategoryIds toDtoWithoutCategories(Book book) {
-        BookDtoWithoutCategoryIds dto = new BookDtoWithoutCategoryIds();
-        dto.setId(book.getId());
-        dto.setTitle(book.getTitle());
-        dto.setAuthor(book.getAuthor());
-        dto.setIsbn(book.getIsbn());
-        dto.setPrice(book.getPrice());
-        dto.setDescription(book.getDescription());
-        dto.setCoverImage(book.getCoverImage());
-        return dto;
     }
 }
