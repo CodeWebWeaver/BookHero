@@ -24,7 +24,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserRegistrationResponseDto register(UserRegistrationRequestDto request) {
+    public UserRegistrationResponseDto register(UserRegistrationRequestDto request)
+            throws RegistrationException {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RegistrationException("Error during registration, wrong data entered");
         }
