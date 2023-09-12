@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: test-insert-into-roles-table
+      author: aleksandrparkhomovsky@gmail.com
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: ROLE_ADMIN
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: ROLE_USER

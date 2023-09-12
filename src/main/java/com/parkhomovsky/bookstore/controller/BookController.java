@@ -1,8 +1,8 @@
 package com.parkhomovsky.bookstore.controller;
 
-import com.parkhomovsky.bookstore.dto.BookDto;
-import com.parkhomovsky.bookstore.dto.BookSearchParameters;
-import com.parkhomovsky.bookstore.dto.CreateBookRequestDto;
+import com.parkhomovsky.bookstore.dto.book.BookDto;
+import com.parkhomovsky.bookstore.dto.book.BookSearchParameters;
+import com.parkhomovsky.bookstore.dto.book.CreateBookRequestDto;
 import com.parkhomovsky.bookstore.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
     private final BookService bookService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @Operation(summary = "Update Book Details",
             description = "Update the details of an existing book.")
@@ -37,6 +39,7 @@ public class BookController {
         return bookService.update(id, createBookRequestDto);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new book",
@@ -49,14 +52,14 @@ public class BookController {
     @Operation(summary = "Get book by ID",
             description = "Retrieve a book by its unique ID.")
     public BookDto getBookById(@PathVariable Long id) {
-        return bookService.getBookById(id);
+        return bookService.getById(id);
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search books",
             description = "Search for books by title or author.")
     public List<BookDto> search(BookSearchParameters parameters) {
-        return bookService.bookSearch(parameters);
+        return bookService.search(parameters);
     }
 
     @GetMapping
@@ -66,6 +69,7 @@ public class BookController {
         return bookService.getAll(pageable);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Mark Book as Deleted",
