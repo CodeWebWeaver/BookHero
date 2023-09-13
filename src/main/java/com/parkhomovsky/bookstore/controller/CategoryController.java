@@ -35,13 +35,13 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new category",
             description = "Create a new category and add it to the database")
-    private CategoryDto create(@RequestBody @Valid CategoryRequestDto categoryRequestDto) {
+    public CategoryDto create(@RequestBody @Valid CategoryRequestDto categoryRequestDto) {
         return categoryService.create(categoryRequestDto);
     }
 
     @GetMapping
     @Operation(summary = "Retrieve all categories", description = "Get list of all categories")
-    private List<CategoryDto> getAllCategories() {
+    public List<CategoryDto> getAllCategories() {
         return categoryService.getAll();
     }
 
@@ -49,7 +49,7 @@ public class CategoryController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update category",
             description = "Update category in database with provided id and data")
-    private CategoryDto update(@PathVariable Long id,
+    public CategoryDto update(@PathVariable Long id,
                                @Valid @RequestBody CategoryRequestDto categoryRequestDto) {
         return categoryService.update(id, categoryRequestDto);
     }
@@ -58,7 +58,7 @@ public class CategoryController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Delete category",
             description = "Delete category from database")
-    private void delete(@PathVariable Long id) {
+    public void delete(@PathVariable Long id) {
         categoryService.delete(id);
     }
 
