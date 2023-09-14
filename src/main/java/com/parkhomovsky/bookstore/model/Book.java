@@ -10,6 +10,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,7 +48,7 @@ public class Book {
     )
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<Category> categories;
+    private Set<Category> categories = new HashSet<>();
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 }

@@ -3,6 +3,7 @@ package com.parkhomovsky.bookstore.dto.book;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.Set;
 import lombok.Data;
 import org.hibernate.validator.constraints.ISBN;
 import org.hibernate.validator.constraints.Length;
@@ -26,4 +27,6 @@ public class CreateBookRequestDto {
     private String description;
     @URL(message = "Invalid URL format")
     private String coverImage;
+    @NotNull
+    private Set<Long> categoryId;
 }

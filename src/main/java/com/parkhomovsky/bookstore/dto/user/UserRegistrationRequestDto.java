@@ -7,7 +7,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 @Data
-@FieldsValueMatch(field = "password", fieldMatch = "repeatedPassword")
+@FieldsValueMatch(field = "password", fieldMatch = "repeatPassword")
 public class UserRegistrationRequestDto {
     @NotBlank
     @Email
@@ -17,7 +17,7 @@ public class UserRegistrationRequestDto {
     private String password;
     @NotBlank
     @Length(min = 8, max = 50)
-    private String repeatedPassword;
+    private String repeatPassword;
     @NotBlank
     private String firstName;
     @NotBlank
