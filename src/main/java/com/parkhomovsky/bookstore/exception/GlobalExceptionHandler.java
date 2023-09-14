@@ -88,6 +88,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(UserNotAuthenticatedException.class)
+    protected ResponseEntity<Object> handleJwtException(UserNotAuthenticatedException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.FORBIDDEN);
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
     private String getErrorMessage(ObjectError ex) {
         if (ex instanceof FieldError) {
             String field = ((FieldError) ex).getField();
