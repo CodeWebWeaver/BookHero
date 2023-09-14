@@ -32,33 +32,20 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto create(CreateBookRequestDto bookRequestDto) {
-        List<Category> categoryList =
-                categoryRepository.findAllById(bookRequestDto.getCategoryId());
-        if (categoryList.isEmpty()) {
-            throw new EntityNotFoundException("Provided categories ids not found: "
-                    + bookRequestDto.getCategoryId());
-        }
-        Set<Category> categories = new HashSet<>(categoryList);
         Book model = bookMapper.toEntity(bookRequestDto);
-        model.setCategories(categories);
-        return bookMapper.toDto(bookRepository.save(model));
+        Book bookWithCategory = includeCategoryByIdInBook(model, bookRequestDto.getCategoryId());
+        return bookMapper.toDto(bookRepository.save(bookWithCategory));
     }
 
     @Override
     public BookDto update(Long id, CreateBookRequestDto bookRequestDto) {
         Optional<Book> optionalBook = bookRepository.findByIdWithCategory(id);
         if (optionalBook.isPresent()) {
-            List<Category> categoryList =
-                    categoryRepository.findAllById(bookRequestDto.getCategoryId());
-            if (categoryList.isEmpty()) {
-                throw new EntityNotFoundException("Provided categories ids not found: "
-                        + bookRequestDto.getCategoryId());
-            }
-            Set<Category> categories = new HashSet<>(categoryList);
             Book changedBook = bookMapper.toEntity(bookRequestDto);
             changedBook.setId(id);
-            changedBook.setCategories(categories);
-            BookDto dto = bookMapper.toDto(bookRepository.save(changedBook));
+            Book bookWithCategory =
+                    includeCategoryByIdInBook(changedBook, bookRequestDto.getCategoryId());
+            BookDto dto = bookMapper.toDto(bookRepository.save(bookWithCategory));
             bookMapper.setCategoryIds(dto, changedBook);
             return dto;
         }
@@ -99,5 +86,16 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAllByCategoryId(categoryId).stream()
                 .map(bookMapper::toDtoWithoutCategories)
                 .collect(Collectors.toList());
+    }
+
+    private Book includeCategoryByIdInBook(Book book, Set<Long> categoryIds) {
+        List<Category> categories = categoryRepository.findAllById(categoryIds);
+        if (categoryIds.isEmpty()) {
+            throw new EntityNotFoundException("Provided categories ids not found: "
+                    + categoryIds);
+        }
+        Set<Category> categoriesSet = new HashSet<>(categories);
+        book.setCategories(categoriesSet);
+        return book;
     }
 }
