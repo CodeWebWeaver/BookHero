@@ -32,7 +32,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto create(CreateBookRequestDto bookRequestDto) {
-        List<Category> categoryList = categoryRepository.findAllById(bookRequestDto.getCategoryId());
+        List<Category> categoryList =
+                categoryRepository.findAllById(bookRequestDto.getCategoryId());
         if (categoryList.isEmpty()) {
             throw new EntityNotFoundException("Provided categories ids not found: "
                     + bookRequestDto.getCategoryId());
@@ -47,7 +48,8 @@ public class BookServiceImpl implements BookService {
     public BookDto update(Long id, CreateBookRequestDto bookRequestDto) {
         Optional<Book> optionalBook = bookRepository.findByIdWithCategory(id);
         if (optionalBook.isPresent()) {
-            List<Category> categoryList = categoryRepository.findAllById(bookRequestDto.getCategoryId());
+            List<Category> categoryList =
+                    categoryRepository.findAllById(bookRequestDto.getCategoryId());
             if (categoryList.isEmpty()) {
                 throw new EntityNotFoundException("Provided categories ids not found: "
                         + bookRequestDto.getCategoryId());
