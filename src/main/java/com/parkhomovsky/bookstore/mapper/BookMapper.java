@@ -8,8 +8,11 @@ import com.parkhomovsky.bookstore.model.Book;
 import com.parkhomovsky.bookstore.model.Category;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.mapstruct.*;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
 @Mapper(config = MapperConfiguration.class)
 public interface BookMapper {

@@ -35,7 +35,7 @@ public class BookController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new book",
             description = "Create a new book and add it to the database")
-    public BookDto createBook(@RequestBody @Valid CreateBookRequestDto book) {
+    public BookDto createBook(@Valid @RequestBody CreateBookRequestDto book) {
         return bookService.create(book);
     }
 
@@ -65,7 +65,7 @@ public class BookController {
     @Operation(summary = "Update Book Details",
             description = "Update the details of an existing book.")
     public BookDto update(
-            @PathVariable Long id, @RequestBody @Valid CreateBookRequestDto createBookRequestDto) {
+            @PathVariable Long id, @Valid @RequestBody CreateBookRequestDto createBookRequestDto) {
         return bookService.update(id, createBookRequestDto);
     }
 
