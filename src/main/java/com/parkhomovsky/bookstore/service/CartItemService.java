@@ -6,6 +6,11 @@ import com.parkhomovsky.bookstore.dto.item.CreateCartItemRequestDto;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 
 public interface CartItemService {
-  CartItemDto addCartItem(Long id, AddCartItemRequestDto cartItemDto) throws UserNotAuthenticatedException;
-  CartItemDto createCartItem(CreateCartItemRequestDto cartItemDto) throws UserNotAuthenticatedException;
+    CartItemDto add(Long id, AddCartItemRequestDto cartItemDto)
+            throws UserNotAuthenticatedException;
+
+    CartItemDto create(CreateCartItemRequestDto cartItemDto)
+            throws UserNotAuthenticatedException;
+
+    CartItemDto delete(Long cartItemId) throws UserNotAuthenticatedException;
 }

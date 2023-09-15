@@ -6,12 +6,15 @@ import com.parkhomovsky.bookstore.dto.item.CartItemDto;
 import com.parkhomovsky.bookstore.dto.item.CreateCartItemRequestDto;
 import com.parkhomovsky.bookstore.model.CartItem;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(config = MapperConfiguration.class)
 public interface CartItemMapper {
-  CartItemDto toDto(CartItem cartItem);
+    @Mapping(source = "book.id", target = "bookId")
+    @Mapping(source = "book.title", target = "bookTitle")
+    CartItemDto toDto(CartItem cartItem);
 
-  CartItem toModel(CreateCartItemRequestDto createCartItemRequestDto);
+    CartItem toModel(CreateCartItemRequestDto createCartItemRequestDto);
 
-  CartItem toModel(AddCartItemRequestDto createCartItemRequestDto);
+    CartItem toModel(AddCartItemRequestDto createCartItemRequestDto);
 }

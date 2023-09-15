@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class ShoppingCartDto {
-  Long id;
-  Long user_id;
-  Set<CartItemDto> cartItemDtos;
+    private Long id;
+    private Long userId;
+    private Set<CartItemDto> cartItemDtos;
 }

@@ -9,6 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 
@@ -16,14 +18,13 @@ import lombok.Data;
 @Data
 @Table(name = "shopping_carts")
 public class ShoppingCart {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
-  private Long id;
-  @Column(name = "owner")
-  @OneToOne
-  private User user;
-  @Column(name = "cart_items")
-  @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL)
-  Set<CartItem> cartItems;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+    @NotNull
+    @OneToOne
+    private User user;
+    @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL)
+    private Set<CartItem> cartItems = new HashSet<>();
 }

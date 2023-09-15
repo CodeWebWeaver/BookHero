@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class AddCartItemRequestDto {
-  @NotNull
-  int quantity;
+    @NotNull
+    private int quantity;
 }

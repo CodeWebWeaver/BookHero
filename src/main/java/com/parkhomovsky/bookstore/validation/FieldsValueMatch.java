@@ -12,11 +12,16 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface FieldsValueMatch {
     String message() default "Fields values don't match!";
+
     String field();
+
     String fieldMatch();
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
-    @Target({ ElementType.TYPE })
+
+    @Target({ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     @interface List {
         FieldsValueMatch[] value();
