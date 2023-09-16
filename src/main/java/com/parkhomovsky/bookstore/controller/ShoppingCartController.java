@@ -4,6 +4,7 @@ import com.parkhomovsky.bookstore.dto.cart.ShoppingCartDto;
 import com.parkhomovsky.bookstore.dto.item.AddCartItemRequestDto;
 import com.parkhomovsky.bookstore.dto.item.CartItemDto;
 import com.parkhomovsky.bookstore.dto.item.CreateCartItemRequestDto;
+import com.parkhomovsky.bookstore.exception.InvalidRequestParametersException;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.service.CartItemService;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
@@ -44,7 +45,7 @@ public class ShoppingCartController {
             description = "Create a new cart item and add it to the shopping cart")
     public CartItemDto createNewCartItem(
             @RequestBody @Valid CreateCartItemRequestDto createCartItemRequestDto)
-            throws UserNotAuthenticatedException {
+            throws UserNotAuthenticatedException, InvalidRequestParametersException {
         return cartItemService.create(createCartItemRequestDto);
     }
 
@@ -52,8 +53,9 @@ public class ShoppingCartController {
     @Operation(summary = "Add item quantity",
             description = "Update quantity field for item in database")
     public CartItemDto updateCartItem(@PathVariable Long cartItemId,
-                              @Valid @RequestBody AddCartItemRequestDto addCartItemRequestDto)
-            throws UserNotAuthenticatedException {
+                                      @Valid @RequestBody
+                                      AddCartItemRequestDto addCartItemRequestDto)
+            throws UserNotAuthenticatedException, InvalidRequestParametersException {
         return cartItemService.add(cartItemId, addCartItemRequestDto);
     }
 
@@ -61,7 +63,7 @@ public class ShoppingCartController {
     @Operation(summary = "Remove item from Shopping Cart",
             description = "Delete item from current user`s shopping cart")
     public CartItemDto deleteCartItem(@PathVariable Long cartItemId)
-            throws UserNotAuthenticatedException {
+            throws UserNotAuthenticatedException, InvalidRequestParametersException {
         return cartItemService.delete(cartItemId);
     }
 }

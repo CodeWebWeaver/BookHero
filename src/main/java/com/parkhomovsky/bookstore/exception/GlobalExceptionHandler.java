@@ -46,15 +46,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleUniqueDataDuplicate(
-            DataIntegrityViolationException ex
-    ) {
+    public ResponseEntity<Object> handleUniqueDataDuplicate(DataIntegrityViolationException ex) {
         Throwable rootCause = ExceptionUtils.getRootCause(ex);
         String errorMessage = "An error occurred while processing the request.";
         if (rootCause != null) {
             errorMessage = "Error: " + rootCause.getMessage();
         }
-        return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
+        Map<String, Object> errorResponse = new LinkedHashMap<>();
+        errorResponse.put(TIMESTAMP, LocalDateTime.now());
+        errorResponse.put(STATUS, HttpStatus.CONFLICT);
+        errorResponse.put(ERROR, errorMessage);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({RegistrationException.class})
@@ -95,6 +98,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", HttpStatus.FORBIDDEN);
         body.put("error", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InvalidRequestParametersException.class)
+    public ResponseEntity<Object> handleInvalidRequestParametersException(
+            InvalidRequestParametersException ex
+    ) {
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        String errorMessage = "An error occurred while proceeding request data.";
+        if (rootCause != null) {
+            errorMessage = "Error: Wrong request data. " + rootCause.getMessage();
+        }
+        Map<String, Object> errorMessageBody = new LinkedHashMap<>();
+        errorMessageBody.put("timestamp", LocalDateTime.now());
+        errorMessageBody.put("status", HttpStatus.FORBIDDEN);
+        errorMessageBody.put("error", errorMessage);
+        return new ResponseEntity<>(errorMessageBody, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Object> handleEntityNotFoundException(
+            EntityNotFoundException ex
+    ) {
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        String errorMessage = "An error occurred while proceeding request data.";
+        if (rootCause != null) {
+            errorMessage = "Error: " + rootCause.getMessage();
+        }
+        Map<String, Object> errorMessageBody = new LinkedHashMap<>();
+        errorMessageBody.put("timestamp", LocalDateTime.now());
+        errorMessageBody.put("status", HttpStatus.NOT_FOUND);
+        errorMessageBody.put("error", errorMessage);
+        return new ResponseEntity<>(errorMessageBody, HttpStatus.NOT_FOUND);
     }
 
     private String getErrorMessage(ObjectError ex) {

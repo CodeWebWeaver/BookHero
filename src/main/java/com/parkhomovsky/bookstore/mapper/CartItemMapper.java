@@ -17,4 +17,6 @@ public interface CartItemMapper {
     CartItem toModel(CreateCartItemRequestDto createCartItemRequestDto);
 
     CartItem toModel(AddCartItemRequestDto createCartItemRequestDto);
+
+    CartItem toModel(CartItemDto cartItemDto);
 }

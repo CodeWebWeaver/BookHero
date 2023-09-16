@@ -60,8 +60,8 @@ public class BookController {
         return bookService.getAll(pageable);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update Book Details",
             description = "Update the details of an existing book.")
     public BookDto update(

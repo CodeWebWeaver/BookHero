@@ -5,102 +5,105 @@ import com.parkhomovsky.bookstore.dto.item.AddCartItemRequestDto;
 import com.parkhomovsky.bookstore.dto.item.CartItemDto;
 import com.parkhomovsky.bookstore.dto.item.CreateCartItemRequestDto;
 import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
+import com.parkhomovsky.bookstore.exception.InvalidRequestParametersException;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.mapper.CartItemMapper;
 import com.parkhomovsky.bookstore.mapper.ShoppingCartMapper;
 import com.parkhomovsky.bookstore.model.Book;
 import com.parkhomovsky.bookstore.model.CartItem;
 import com.parkhomovsky.bookstore.model.ShoppingCart;
-import com.parkhomovsky.bookstore.model.User;
 import com.parkhomovsky.bookstore.repository.book.BookRepository;
 import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
-import com.parkhomovsky.bookstore.repository.user.UserRepository;
 import com.parkhomovsky.bookstore.service.CartItemService;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
-import com.parkhomovsky.bookstore.service.UserService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class CartItemServiceImpl implements CartItemService {
     private final CartItemRepository cartItemRepository;
     private final BookRepository bookRepository;
     private final CartItemMapper cartItemMapper;
     private final ShoppingCartService shoppingCartService;
     private final ShoppingCartMapper shoppingCartMapper;
-    private final UserRepository userRepository;
 
     @Override
-    public CartItemDto add(Long id, AddCartItemRequestDto cartItemDto)
+    public CartItemDto add(Long cartItemId, AddCartItemRequestDto addCartItemRequestDto)
             throws UserNotAuthenticatedException {
-        ShoppingCart shoppingCart = getShoppingCartWithOwner();
-        Set<CartItem> cartItems = shoppingCart.getCartItems();
-        Optional<CartItem> cartItemForAdd = cartItems.stream()
-                .filter(cartItem -> cartItem.getId().equals(id))
-                .findFirst();
-        CartItem addCartItem = cartItemForAdd.orElseThrow(() ->
-                new EntityNotFoundException("No cart item found for adding. Create new request"));
-        addCartItem.setQuantity(cartItemDto.getQuantity());
-        CartItem savedCartItem = cartItemRepository.save(addCartItem);
-        return cartItemMapper.toDto(savedCartItem);
+        ShoppingCart shoppingCart = getShoppingCart();
+        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
+        Optional<CartItem> possibleCartItem = findCartItemById(cartItems, cartItemId);
+        if (possibleCartItem.isPresent()) {
+            CartItem presentCartItem = possibleCartItem.get();
+            presentCartItem.setQuantity(presentCartItem
+                    .getQuantity() + addCartItemRequestDto.getQuantity());
+            cartItemRepository.save(presentCartItem);
+            return cartItemMapper.toDto(presentCartItem);
+        }
+        throw new EntityNotFoundException("No item found with provided id");
     }
 
     @Override
     public CartItemDto create(CreateCartItemRequestDto cartItemDto)
-            throws UserNotAuthenticatedException {
-        ShoppingCart shoppingCart = getShoppingCartWithOwner();
-        List<CartItem> cartItemsList = cartItemRepository.findByShoppingCartId(shoppingCart.getId());
-        cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
-        Optional<CartItem> possibleCartItem = cartItemsList.stream()
-                .filter(cartItem -> cartItem.getBook().getId().equals(cartItemDto.getBookId()))
-                .findFirst();
+            throws UserNotAuthenticatedException, InvalidRequestParametersException {
+        ShoppingCart shoppingCart = getShoppingCart();
+        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
+        Optional<CartItem> possibleCartItem =
+                findCartItemByBookId(cartItems, cartItemDto.getBookId());
         CartItem requestCartItem = cartItemMapper.toModel(cartItemDto);
         if (possibleCartItem.isPresent()) {
             CartItem presentCartItem = possibleCartItem.get();
-            presentCartItem.setQuantity(presentCartItem.getQuantity() + requestCartItem.getQuantity());
+            presentCartItem.setQuantity(presentCartItem
+                    .getQuantity() + requestCartItem.getQuantity());
             cartItemRepository.save(presentCartItem);
             return cartItemMapper.toDto(presentCartItem);
-        } else {
+        }
+        try {
             Book bookFromId = getBookFromId(cartItemDto.getBookId());
             requestCartItem.setBook(bookFromId);
             requestCartItem.setShoppingCart(shoppingCart);
             CartItem savedCartItem = cartItemRepository.save(requestCartItem);
             return cartItemMapper.toDto(savedCartItem);
+        } catch (EntityNotFoundException e) {
+            throw new InvalidRequestParametersException("Wrong book id: "
+                    + cartItemDto.getBookId());
         }
+
     }
 
     @Override
-    public CartItemDto delete(Long cartItemId) throws UserNotAuthenticatedException {
-        ShoppingCart shoppingCart =
-                shoppingCartMapper.toModel(shoppingCartService.getUserShoppingCart());
-        Set<CartItem> cartItems = shoppingCart.getCartItems();
-        Optional<CartItem> cartItemForDelete = cartItems.stream()
-                .filter(cartItem -> cartItem.getId().equals(cartItemId))
-                .findFirst();
-        if (cartItemForDelete.isEmpty()) {
-            throw new EntityNotFoundException(
+    public CartItemDto delete(Long cartItemId)
+            throws UserNotAuthenticatedException, InvalidRequestParametersException {
+        ShoppingCart shoppingCart = getShoppingCart();
+        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
+        Optional<CartItem> possibleCartItem = findCartItemById(cartItems, cartItemId);
+        if (possibleCartItem.isEmpty()) {
+            throw new InvalidRequestParametersException(
                     "Cart item with provided id not found. id:" + cartItemId);
         }
-        CartItem deleteCartItem = cartItemForDelete.get();
-        cartItems.remove(deleteCartItem);
+        CartItem deleteCartItem = possibleCartItem.get();
         cartItemRepository.delete(deleteCartItem);
         return cartItemMapper.toDto(deleteCartItem);
     }
 
-    private ShoppingCart getShoppingCartWithOwner() throws UserNotAuthenticatedException {
+    private Set<CartItem> getCartItemsListForShoppingCart(ShoppingCart shoppingCart) {
+        List<CartItem> cartItemsList =
+                cartItemRepository.findByShoppingCartId(shoppingCart.getId());
+        cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
+        return new HashSet<>(cartItemsList);
+    }
+
+    private ShoppingCart getShoppingCart() throws UserNotAuthenticatedException {
         ShoppingCartDto userShoppingCartDto = shoppingCartService.getUserShoppingCart();
-        ShoppingCart shoppingCart = shoppingCartMapper
+        return shoppingCartMapper
                 .toModel(userShoppingCartDto);
-        Optional<User> shoppingCartOwner = userRepository.findById(userShoppingCartDto.getUserId());
-        shoppingCart.setUser(shoppingCartOwner
-                .orElseThrow(() -> new EntityNotFoundException("User not found for shopping cart: "
-                        + shoppingCart.getId())));
-        return shoppingCart;
     }
 
     private Book getBookFromId(Long id) {
@@ -110,5 +113,17 @@ public class CartItemServiceImpl implements CartItemService {
                     + id + " during add cart item to cart");
         }
         return bookById.get();
+    }
+
+    private Optional<CartItem> findCartItemById(Set<CartItem> cartItemsList, Long cartItemId) {
+        return cartItemsList.stream()
+                .filter(cartItem -> cartItem.getId().equals(cartItemId))
+                .findFirst();
+    }
+
+    private Optional<CartItem> findCartItemByBookId(Set<CartItem> cartItemsList, Long bookId) {
+        return cartItemsList.stream()
+                .filter(cartItem -> cartItem.getBook().getId().equals(bookId))
+                .findFirst();
     }
 }
