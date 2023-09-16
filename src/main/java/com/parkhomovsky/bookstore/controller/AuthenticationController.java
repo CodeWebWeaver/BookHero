@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping("/auth")
 @Tag(name = "User auth",
-        description = "Register or authenticate User")
+        description = "Register or authenticate user")
 public class AuthenticationController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
@@ -32,7 +32,7 @@ public class AuthenticationController {
     @Operation(summary = "Login",
             description = "Authenticate user in system")
     public UserLoginResponseDto login(
-            @RequestBody @Valid UserLoginRequestDto requestDto
+            @Valid @RequestBody UserLoginRequestDto requestDto
     ) {
         return authenticationService.authenticate(requestDto);
     }
@@ -42,7 +42,7 @@ public class AuthenticationController {
             description = "Register user in system")
     @ResponseBody
     public UserRegistrationResponseDto register(
-            @RequestBody @Valid UserRegistrationRequestDto requestDto
+            @Valid @RequestBody UserRegistrationRequestDto requestDto
     )
             throws RegistrationException {
         return userService.register(requestDto);

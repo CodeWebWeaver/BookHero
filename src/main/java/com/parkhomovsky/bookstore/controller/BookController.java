@@ -22,36 +22,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/books")
 @Tag(name = "Book management",
         description = "Endpoints for managing products")
 public class BookController {
     private final BookService bookService;
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
-    @Operation(summary = "Update Book Details",
-            description = "Update the details of an existing book.")
-    public BookDto update(
-            @PathVariable Long id, @RequestBody @Valid CreateBookRequestDto createBookRequestDto) {
-        return bookService.update(id, createBookRequestDto);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new book",
-            description = "Create a new book and add it to the database.")
-    public BookDto createBook(@RequestBody @Valid CreateBookRequestDto book) {
+            description = "Create a new book and add it to the database")
+    public BookDto create(@Valid @RequestBody CreateBookRequestDto book) {
         return bookService.create(book);
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get book by ID",
-            description = "Retrieve a book by its unique ID.")
-    public BookDto getBookById(@PathVariable Long id) {
+    @Operation(summary = "Get book by id",
+            description = "Retrieve a book by its unique id.")
+    public BookDto getById(@PathVariable Long id) {
         return bookService.getById(id);
     }
 
@@ -69,8 +60,17 @@ public class BookController {
         return bookService.getAll(pageable);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Update Book Details",
+            description = "Update the details of an existing book.")
+    public BookDto update(
+            @PathVariable Long id, @Valid @RequestBody CreateBookRequestDto createBookRequestDto) {
+        return bookService.update(id, createBookRequestDto);
+    }
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Mark Book as Deleted",
             description = "Mark a book as 'deleted' in the database.")
