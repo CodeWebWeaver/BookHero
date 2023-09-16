@@ -52,7 +52,7 @@ public class ShoppingCartController {
     @PutMapping("cart-items/{cartItemId}")
     @Operation(summary = "Add item quantity",
             description = "Update quantity field for item in database")
-    public CartItemDto updateCartItem(@PathVariable Long cartItemId,
+    public CartItemDto updateCartItemQuantity(@PathVariable Long cartItemId,
                                       @Valid @RequestBody
                                       AddCartItemRequestDto addCartItemRequestDto)
             throws UserNotAuthenticatedException, InvalidRequestParametersException {
