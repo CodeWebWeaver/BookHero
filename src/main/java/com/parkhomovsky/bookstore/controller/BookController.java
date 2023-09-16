@@ -30,19 +30,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
     private final BookService bookService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new book",
             description = "Create a new book and add it to the database")
-    public BookDto createBook(@Valid @RequestBody CreateBookRequestDto book) {
+    public BookDto create(@Valid @RequestBody CreateBookRequestDto book) {
         return bookService.create(book);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get book by id",
             description = "Retrieve a book by its unique id.")
-    public BookDto getBookById(@PathVariable Long id) {
+    public BookDto getById(@PathVariable Long id) {
         return bookService.getById(id);
     }
 
@@ -60,8 +61,8 @@ public class BookController {
         return bookService.getAll(pageable);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update Book Details",
             description = "Update the details of an existing book.")
     public BookDto update(
@@ -69,8 +70,8 @@ public class BookController {
         return bookService.update(id, createBookRequestDto);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Mark Book as Deleted",
             description = "Mark a book as 'deleted' in the database.")
