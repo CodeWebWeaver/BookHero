@@ -4,6 +4,7 @@ import com.parkhomovsky.bookstore.dto.user.UserRegistrationRequestDto;
 import com.parkhomovsky.bookstore.dto.user.UserRegistrationResponseDto;
 import com.parkhomovsky.bookstore.enums.RoleName;
 import com.parkhomovsky.bookstore.exception.RegistrationException;
+import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.mapper.UserMapper;
 import com.parkhomovsky.bookstore.model.Role;
 import com.parkhomovsky.bookstore.model.User;
@@ -12,6 +13,9 @@ import com.parkhomovsky.bookstore.repository.user.UserRepository;
 import com.parkhomovsky.bookstore.service.UserService;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -34,5 +38,19 @@ public class UserServiceImpl implements UserService {
         user.setRoles(Set.of(role));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         return userMapper.toRegistrationResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserDetails getUser() throws UserNotAuthenticatedException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new UserNotAuthenticatedException("User not authenticated");
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            return (UserDetails) principal;
+        } else {
+            throw new UserNotAuthenticatedException("User not authenticated");
+        }
     }
 }
