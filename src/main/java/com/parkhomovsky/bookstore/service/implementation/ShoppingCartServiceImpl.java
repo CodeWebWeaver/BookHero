@@ -13,6 +13,7 @@ import com.parkhomovsky.bookstore.repository.cart.ShoppingCartRepository;
 import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
 import com.parkhomovsky.bookstore.repository.user.UserRepository;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -32,17 +33,32 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final CartItemMapper cartItemMapper;
 
     @Override
-    public ShoppingCartDto getUserShoppingCart()
+    public ShoppingCartDto getUserShoppingCartDto()
             throws UserNotAuthenticatedException, EntityNotFoundException {
         String username = getUsernameFromAuthentication();
         ShoppingCart shoppingCart = findOrCreateShoppingCartForUser(username);
-        List<CartItem> cartItemsListForShoppingCart = getCartItemsListForShoppingCart(shoppingCart);
+        Set<CartItem> cartItemsListForShoppingCart = getCartItemsSetForShoppingCart(shoppingCart);
         Set<CartItemDto> cartItemDtoSet = cartItemsListForShoppingCart.stream()
                 .map(cartItemMapper::toDto)
                 .collect(Collectors.toSet());
         ShoppingCartDto shoppingCartDto = shoppingCartMapper.toDto(shoppingCart);
         shoppingCartDto.setCartItemDtos(cartItemDtoSet);
         return shoppingCartDto;
+    }
+
+    @Override
+    public ShoppingCart getUserShoppingCart()
+            throws UserNotAuthenticatedException, EntityNotFoundException {
+        String username = getUsernameFromAuthentication();
+        return findOrCreateShoppingCartForUser(username);
+    }
+
+    @Override
+    public Set<CartItem> getCartItemsSetForShoppingCart(ShoppingCart shoppingCart) {
+        List<CartItem> cartItemsList =
+                cartItemRepository.findByShoppingCartId(shoppingCart.getId());
+        cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
+        return new HashSet<>(cartItemsList);
     }
 
     private String getUsernameFromAuthentication() throws UserNotAuthenticatedException {
@@ -69,12 +85,5 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUser(user);
         return shoppingCartRepository.save(shoppingCart);
-    }
-
-    private List<CartItem> getCartItemsListForShoppingCart(ShoppingCart shoppingCart) {
-        List<CartItem> cartItemsList =
-                cartItemRepository.findByShoppingCartId(shoppingCart.getId());
-        cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
-        return cartItemsList;
     }
 }

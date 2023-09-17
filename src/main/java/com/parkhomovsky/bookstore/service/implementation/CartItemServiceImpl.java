@@ -16,8 +16,6 @@ import com.parkhomovsky.bookstore.repository.book.BookRepository;
 import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
 import com.parkhomovsky.bookstore.service.CartItemService;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +30,12 @@ public class CartItemServiceImpl implements CartItemService {
     private final BookRepository bookRepository;
     private final CartItemMapper cartItemMapper;
     private final ShoppingCartService shoppingCartService;
-    private final ShoppingCartMapper shoppingCartMapper;
 
     @Override
     public CartItemDto add(Long cartItemId, AddCartItemRequestDto addCartItemRequestDto)
             throws UserNotAuthenticatedException {
-        ShoppingCart shoppingCart = getShoppingCart();
-        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
+        ShoppingCart shoppingCart = shoppingCartService.getUserShoppingCart();
+        Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
         Optional<CartItem> possibleCartItem = findCartItemById(cartItems, cartItemId);
         if (possibleCartItem.isPresent()) {
             CartItem presentCartItem = possibleCartItem.get();
@@ -53,8 +50,8 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public CartItemDto create(CreateCartItemRequestDto cartItemDto)
             throws UserNotAuthenticatedException, InvalidRequestParametersException {
-        ShoppingCart shoppingCart = getShoppingCart();
-        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
+        ShoppingCart shoppingCart = shoppingCartService.getUserShoppingCart();
+        Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
         Optional<CartItem> possibleCartItem =
                 findCartItemByBookId(cartItems, cartItemDto.getBookId());
         CartItem requestCartItem = cartItemMapper.toModel(cartItemDto);
@@ -81,8 +78,8 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public CartItemDto delete(Long cartItemId)
             throws UserNotAuthenticatedException, InvalidRequestParametersException {
-        ShoppingCart shoppingCart = getShoppingCart();
-        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
+        ShoppingCart shoppingCart = shoppingCartService.getUserShoppingCart();
+        Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
         Optional<CartItem> possibleCartItem = findCartItemById(cartItems, cartItemId);
         if (possibleCartItem.isEmpty()) {
             throw new InvalidRequestParametersException(
@@ -91,19 +88,6 @@ public class CartItemServiceImpl implements CartItemService {
         CartItem deleteCartItem = possibleCartItem.get();
         cartItemRepository.delete(deleteCartItem);
         return cartItemMapper.toDto(deleteCartItem);
-    }
-
-    private Set<CartItem> getCartItemsListForShoppingCart(ShoppingCart shoppingCart) {
-        List<CartItem> cartItemsList =
-                cartItemRepository.findByShoppingCartId(shoppingCart.getId());
-        cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
-        return new HashSet<>(cartItemsList);
-    }
-
-    private ShoppingCart getShoppingCart() throws UserNotAuthenticatedException {
-        ShoppingCartDto userShoppingCartDto = shoppingCartService.getUserShoppingCart();
-        return shoppingCartMapper
-                .toModel(userShoppingCartDto);
     }
 
     private Book getBookFromId(Long id) {

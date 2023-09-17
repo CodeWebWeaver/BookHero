@@ -1,5 +1,6 @@
 package com.parkhomovsky.bookstore.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.parkhomovsky.bookstore.enums.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import lombok.Data;
 

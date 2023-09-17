@@ -11,7 +11,7 @@ import lombok.Data;
 public class OrderDto {
     private Long id;
     private Long userId;
-    private Set<OrderItemDto> orderItemsDtos;
+    private Set<OrderItemDto> orderItems;
     private LocalDateTime orderDate;
     private BigDecimal total;
     private Status status;

@@ -36,7 +36,7 @@ public class ShoppingCartController {
     @Operation(summary = "Retrieve user`s shopping cart",
             description = "Retrieve cart and items set in shopping cart")
     public ShoppingCartDto getUserShoppingCart() throws UserNotAuthenticatedException {
-        return shoppingCartService.getUserShoppingCart();
+        return shoppingCartService.getUserShoppingCartDto();
     }
 
     @PostMapping

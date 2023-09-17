@@ -2,9 +2,11 @@ package com.parkhomovsky.bookstore.controller;
 
 import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
 import com.parkhomovsky.bookstore.dto.order_item.OrderItemDto;
+import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.service.OrderService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,11 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Orders management",
         description = "Endpoints for managing user orders")
 public class OrderController {
-    private OrderService orderService;
+    private final OrderService orderService;
 
     @PostMapping("/place-order")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemDto> placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto) {
+    public Set<OrderItemDto> placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto) throws UserNotAuthenticatedException {
         return orderService.process(orderPlaceRequestDto);
     }
 }
