@@ -9,7 +9,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Entity
@@ -27,5 +26,4 @@ public class OrderItem {
     private Book book;
     @Column(name = "quantity", nullable = false)
     private int quantity;
-
 }
