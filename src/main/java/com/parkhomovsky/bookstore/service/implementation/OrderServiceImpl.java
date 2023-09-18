@@ -3,10 +3,13 @@ package com.parkhomovsky.bookstore.service.implementation;
 import com.parkhomovsky.bookstore.dto.order.OrderDto;
 import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
 import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
+import com.parkhomovsky.bookstore.dto.order.UpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.enums.Status;
+import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.mapper.OrderItemsMapper;
+import com.parkhomovsky.bookstore.mapper.OrderMapper;
 import com.parkhomovsky.bookstore.model.CartItem;
 import com.parkhomovsky.bookstore.model.Order;
 import com.parkhomovsky.bookstore.model.OrderItem;
@@ -17,78 +20,125 @@ import com.parkhomovsky.bookstore.repository.orderitems.OrderItemsRepository;
 import com.parkhomovsky.bookstore.service.OrderService;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
 import com.parkhomovsky.bookstore.service.UserService;
-import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    private final OrderItemsMapper orderItemsMapper;
     private final ShoppingCartService shoppingCartService;
     private final OrderRepository orderRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final UserService userService;
+    private final OrderMapper orderMapper;
+    private final OrderItemsMapper orderItemsMapper;
 
     @Override
-    public Set<OrderItemDto> process(OrderPlaceRequestDto orderPlaceRequestDto)
+    public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto)
             throws UserNotAuthenticatedException {
-        Order order = new Order();
-        order.setShippingAddress(orderPlaceRequestDto.getShippingAddress());
+        Set<OrderItem> orderItems = getOrderItems();
+        Order order = buildOrder(orderPlaceRequestDto.getShippingAddress(), orderItems);
+        orderRepository.save(order);
+        List<OrderItemDto> orderItemDtos = orderItems.stream()
+                .map(orderItemsMapper::toDto)
+                .collect(Collectors.toList());
+        order.setOrderItems(null);
+        orderItems.forEach(orderItem -> orderItem.setOrder(order));
+        OrderDto orderDto = orderMapper.toDto(order);
+        orderDto.setOrderItems(orderItemDtos);
+        orderItemsRepository.saveAll(orderItems);
+        return orderDto;
+    }
 
+    @Override
+    public List<OrderDto> getAll(Pageable pageable) throws UserNotAuthenticatedException {
+        User currentUser = (User) userService.getUser();
+        List<Order> orders = orderRepository.findAllByUser(currentUser);
+        List<Long> orderIds = orders.stream()
+                .map(Order::getId)
+                .collect(Collectors.toList());
+        List<OrderItem> orderItems = orderItemsRepository
+                .findAllByOrderIdInAndUserId(orderIds, currentUser.getId());
+        Map<Long, List<OrderItem>> orderItemMap = orderItems.stream()
+                .collect(Collectors.groupingBy(orderItem -> orderItem.getOrder().getId()));
+        List<OrderDto> orderDtos = new ArrayList<>();
+        for (Order order : orders) {
+            List<OrderItem> orderItemsForOrder =
+                    orderItemMap.getOrDefault(order.getId(), Collections.emptyList());
+            List<OrderItemDto> orderItemDtos = orderItemsToOrderItemsDto(orderItemsForOrder);
+            OrderDto orderDto = buildOrderDto(order, orderItemDtos);
+            orderDtos.add(orderDto);
+        }
+        return orderDtos;
+    }
+
+    @Override
+    public UpdateResponseDto updateStatus(Long orderId, OrderUpdateStatusRequest updateStatusRequest) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order with id "
+                        + orderId + " not found"));
+        Status newStatus = updateStatusRequest.getStatus();
+        order.setStatus(newStatus);
+        order = orderRepository.save(order);
+        return orderMapper.toUpdateResponse(order);
+    }
+
+    @Override
+    public List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId) {
+        List<OrderItem> orderItems = orderItemsRepository.findAllByOrderId(orderId);
+        return orderItemsToOrderItemsDto(orderItems);
+    }
+
+    @Override
+    public OrderItemDto getOrderItemByidDto(Long orderId, Long itemId) {
+        return null;
+    }
+
+    private Set<OrderItem> getOrderItems() throws UserNotAuthenticatedException {
         ShoppingCart shoppingCart = shoppingCartService.getUserShoppingCart();
         Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
-        Set<OrderItem> orderItems = cartItems.stream()
+        return cartItems.stream()
                 .map(orderItemsMapper::toModel)
                 .collect(Collectors.toSet());
+    }
 
+    private Order buildOrder(String shippingAddress, Set<OrderItem> orderItems)
+            throws UserNotAuthenticatedException {
+        Order order = new Order();
+        order.setShippingAddress(shippingAddress);
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(Status.PENDING);
-        order.setOrderItems(orderItems);
         order.setUser((User) userService.getUser());
+        order.setTotal(getTotalPrice(orderItems));
+        order.setOrderItems(orderItems);
+        return order;
+    }
 
-        BigDecimal sum = orderItems.stream()
+    private BigDecimal getTotalPrice(Set<OrderItem> orderItems) {
+        return orderItems.stream()
                 .map(orderItem -> orderItem.getBook().getPrice()
                         .multiply(BigDecimal.valueOf(orderItem.getQuantity())))
-                .reduce(new BigDecimal(0.0), BigDecimal::add);
-        order.setTotal(sum);
-        orderRepository.save(order);
+                .reduce(new BigDecimal("0.0"), BigDecimal::add);
+    }
 
-        // Устанавливаем order в каждом OrderItem
-        for (OrderItem orderItem : orderItems) {
-            orderItem.setOrder(order);
-        }
+    private OrderDto buildOrderDto(Order order, List<OrderItemDto> orderItemsDtos) {
+        OrderDto orderDto = orderMapper.toDto(order);
+        orderDto.setOrderItems(orderItemsDtos);
+        return orderDto;
+    }
 
-        // Сохраняем OrderItem
-        List<OrderItem> orderItemsList = orderItemsRepository.saveAll(orderItems);
-
-        return orderItemsList.stream()
+    private List<OrderItemDto> orderItemsToOrderItemsDto(List<OrderItem> orderItems) {
+        return orderItems.stream()
                 .map(orderItemsMapper::toDto)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public List<OrderDto> getAll(Pageable pageable) {
-        return null;
-    }
-
-    @Override
-    public OrderDto updateStatus(OrderUpdateStatusRequest updateStatusRequest) {
-        return null;
-    }
-
-    @Override
-    public List<OrderItemDto> getOrderItems(Long orderId) {
-        return null;
-    }
-
-    @Override
-    public OrderItem getOrderItem(Long orderId, Long itemId) {
-        return null;
+                .collect(Collectors.toList());
     }
 }

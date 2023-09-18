@@ -5,10 +5,12 @@ import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.model.CartItem;
 import com.parkhomovsky.bookstore.model.OrderItem;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(config = MapperConfiguration.class)
 public interface OrderItemsMapper {
     OrderItem toModel(CartItem cartItem);
 
+    @Mapping(target = "bookId", source = "book.id")
     OrderItemDto toDto(OrderItem orderItem);
 }

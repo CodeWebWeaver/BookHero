@@ -3,22 +3,23 @@ package com.parkhomovsky.bookstore.service;
 import com.parkhomovsky.bookstore.dto.order.OrderDto;
 import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
 import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
+import com.parkhomovsky.bookstore.dto.order.UpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
-import com.parkhomovsky.bookstore.model.OrderItem;
-import java.awt.print.Pageable;
 import java.util.List;
-import java.util.Set;
+import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
-    Set<OrderItemDto> process(OrderPlaceRequestDto orderPlaceRequestDto)
+    OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto)
             throws UserNotAuthenticatedException;
 
-    List<OrderDto> getAll(Pageable pageable);
+    List<OrderDto> getAll(Pageable pageable) throws UserNotAuthenticatedException;
 
-    OrderDto updateStatus(OrderUpdateStatusRequest updateStatusRequest);
+    UpdateResponseDto updateStatus(Long orderId, OrderUpdateStatusRequest updateStatusRequest);
 
-    List<OrderItemDto> getOrderItems(Long orderId);
+    List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId)
+            throws UserNotAuthenticatedException;
 
-    OrderItem getOrderItem(Long orderId, Long itemId);
+    OrderItemDto getOrderItemByidDto(Long orderId, Long itemId)
+            throws UserNotAuthenticatedException;
 }
