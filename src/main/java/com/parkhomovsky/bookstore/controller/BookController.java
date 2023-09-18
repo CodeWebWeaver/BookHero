@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -49,7 +50,7 @@ public class BookController {
     @GetMapping("/search")
     @Operation(summary = "Search books",
             description = "Search for books by title or author.")
-    public List<BookDto> search(BookSearchParameters parameters) {
+    public List<BookDto> search(@ModelAttribute BookSearchParameters parameters) {
         return bookService.search(parameters);
     }
 

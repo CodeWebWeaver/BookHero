@@ -1,6 +1,6 @@
 package com.parkhomovsky.bookstore.dto.order;
 
-import com.parkhomovsky.bookstore.dto.order_item.OrderItemDto;
+import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.enums.Status;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

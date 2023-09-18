@@ -1,11 +1,10 @@
 package com.parkhomovsky.bookstore.controller;
 
 import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
-import com.parkhomovsky.bookstore.dto.order_item.OrderItemDto;
+import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.service.OrderService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,8 @@ public class OrderController {
 
     @PostMapping("/place-order")
     @ResponseStatus(HttpStatus.OK)
-    public Set<OrderItemDto> placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto) throws UserNotAuthenticatedException {
+    public Set<OrderItemDto> placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto)
+            throws UserNotAuthenticatedException {
         return orderService.process(orderPlaceRequestDto);
     }
 }

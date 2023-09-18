@@ -1,4 +1,4 @@
-package com.parkhomovsky.bookstore.dto.order_item;
+package com.parkhomovsky.bookstore.dto.orderitem;
 
 import lombok.Data;
 

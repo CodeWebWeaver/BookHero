@@ -3,7 +3,7 @@ package com.parkhomovsky.bookstore.service.implementation;
 import com.parkhomovsky.bookstore.dto.order.OrderDto;
 import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
 import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
-import com.parkhomovsky.bookstore.dto.order_item.OrderItemDto;
+import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.enums.Status;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.mapper.OrderItemsMapper;
@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,7 +36,8 @@ public class OrderServiceImpl implements OrderService {
     private final UserService userService;
 
     @Override
-    public Set<OrderItemDto> process(OrderPlaceRequestDto orderPlaceRequestDto) throws UserNotAuthenticatedException {
+    public Set<OrderItemDto> process(OrderPlaceRequestDto orderPlaceRequestDto)
+            throws UserNotAuthenticatedException {
         Order order = new Order();
         order.setShippingAddress(orderPlaceRequestDto.getShippingAddress());
 
@@ -54,7 +53,8 @@ public class OrderServiceImpl implements OrderService {
         order.setUser((User) userService.getUser());
 
         BigDecimal sum = orderItems.stream()
-                .map(orderItem -> orderItem.getBook().getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())))
+                .map(orderItem -> orderItem.getBook().getPrice()
+                        .multiply(BigDecimal.valueOf(orderItem.getQuantity())))
                 .reduce(new BigDecimal(0.0), BigDecimal::add);
         order.setTotal(sum);
         orderRepository.save(order);
@@ -71,7 +71,6 @@ public class OrderServiceImpl implements OrderService {
                 .map(orderItemsMapper::toDto)
                 .collect(Collectors.toSet());
     }
-
 
     @Override
     public List<OrderDto> getAll(Pageable pageable) {

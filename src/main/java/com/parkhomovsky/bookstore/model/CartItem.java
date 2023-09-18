@@ -10,7 +10,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Entity
@@ -22,12 +21,10 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @NotNull
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "shopping_cart_id")
     private ShoppingCart shoppingCart;
-    @NotNull
-    @OneToOne
+    @OneToOne(optional = false)
     private Book book;
     @Column(name = "quantity", nullable = false)
     private int quantity;
