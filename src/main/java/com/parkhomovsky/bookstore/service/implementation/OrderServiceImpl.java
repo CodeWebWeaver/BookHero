@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto)
             throws UserNotAuthenticatedException {
-        Set<OrderItem> orderItems = getOrderItems();
+        Set<OrderItem> orderItems = getOrderItemsDtoFromShoppingCart();
         Order order = buildOrder(orderPlaceRequestDto.getShippingAddress(), orderItems);
         orderRepository.save(order);
         List<OrderItemDto> orderItemDtos = orderItems.stream()
@@ -82,7 +83,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public UpdateResponseDto updateStatus(Long orderId, OrderUpdateStatusRequest updateStatusRequest) {
+    public UpdateResponseDto updateStatus(Long orderId,
+                                          OrderUpdateStatusRequest updateStatusRequest) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
@@ -94,16 +96,25 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId) {
-        List<OrderItem> orderItems = orderItemsRepository.findAllByOrderId(orderId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order with id "
+                        + orderId + " not found"));
+        List<OrderItem> orderItems = orderItemsRepository.findByOrder(order);
         return orderItemsToOrderItemsDto(orderItems);
     }
 
     @Override
     public OrderItemDto getOrderItemByidDto(Long orderId, Long itemId) {
-        return null;
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order with id "
+                        + orderId + " not found"));
+        Optional<OrderItem> orderItem = orderItemsRepository.findByIdAndOrder(itemId, order);
+        return orderItemsMapper.toDto(orderItem.orElseThrow(() ->
+                new EntityNotFoundException("Order item with id "
+                        + itemId + " not found in order with id " + orderId)));
     }
 
-    private Set<OrderItem> getOrderItems() throws UserNotAuthenticatedException {
+    private Set<OrderItem> getOrderItemsDtoFromShoppingCart() throws UserNotAuthenticatedException {
         ShoppingCart shoppingCart = shoppingCartService.getUserShoppingCart();
         Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
         return cartItems.stream()

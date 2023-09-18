@@ -69,7 +69,7 @@ public class OrderController {
     @GetMapping("/{orderId}/items/{itemId}")
     @Operation(summary = "Get item by orderId and itemId",
             description = "Retrieve a specific OrderItem within an order")
-    public OrderItemDto getAllFromOrder(@PathVariable Long orderId,
+    public OrderItemDto getItemFromOrder(@PathVariable Long orderId,
                                              @PathVariable Long itemId)
             throws UserNotAuthenticatedException {
         return orderService.getOrderItemByidDto(orderId, itemId);
