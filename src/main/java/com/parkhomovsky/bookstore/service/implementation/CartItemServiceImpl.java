@@ -61,7 +61,7 @@ public class CartItemServiceImpl implements CartItemService {
             return cartItemMapper.toDto(presentCartItem);
         }
         try {
-            Book bookFromId = getBookFromId(cartItemDto.getBookId());
+            Book bookFromId = getBookFromId(requestCartItem.getBook().getId());
             requestCartItem.setBook(bookFromId);
             requestCartItem.setShoppingCart(shoppingCart);
             CartItem savedCartItem = cartItemRepository.save(requestCartItem);
