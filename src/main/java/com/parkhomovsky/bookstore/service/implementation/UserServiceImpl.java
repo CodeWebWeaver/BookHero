@@ -53,4 +53,9 @@ public class UserServiceImpl implements UserService {
             throw new UserNotAuthenticatedException("User not authenticated");
         }
     }
+
+    @Override
+    public Long getUserId() throws UserNotAuthenticatedException {
+        return ((User) getUser()).getId();
+    }
 }

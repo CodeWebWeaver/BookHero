@@ -7,8 +7,10 @@ import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService {
-    public UserRegistrationResponseDto register(
+    UserRegistrationResponseDto register(
             UserRegistrationRequestDto requestDto) throws RegistrationException;
 
     UserDetails getUser() throws UserNotAuthenticatedException;
+
+    Long getUserId() throws UserNotAuthenticatedException;
 }

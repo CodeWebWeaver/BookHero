@@ -13,6 +13,7 @@ import com.parkhomovsky.bookstore.repository.cart.ShoppingCartRepository;
 import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
 import com.parkhomovsky.bookstore.repository.user.UserRepository;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
+import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +60,12 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 cartItemRepository.findByShoppingCartId(shoppingCart.getId());
         cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
         return new HashSet<>(cartItemsList);
+    }
+
+    @Override
+    @Transactional
+    public void clearShoppingCart() throws UserNotAuthenticatedException {
+        cartItemRepository.deleteAllByShoppingCartId(getUserShoppingCart().getId());
     }
 
     private String getUsernameFromAuthentication() throws UserNotAuthenticatedException {

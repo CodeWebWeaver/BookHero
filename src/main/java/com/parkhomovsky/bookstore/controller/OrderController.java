@@ -5,6 +5,7 @@ import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
 import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
 import com.parkhomovsky.bookstore.dto.order.UpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
+import com.parkhomovsky.bookstore.exception.EmptyShoppingCartException;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,15 +39,15 @@ public class OrderController {
     @Operation(summary = "Place new order",
             description = "Create a new order and add it to the database")
     public OrderDto placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto)
-            throws UserNotAuthenticatedException {
+            throws UserNotAuthenticatedException, EmptyShoppingCartException {
         return orderService.process(orderPlaceRequestDto);
     }
 
     @GetMapping
     @Operation(summary = "Get all orders",
             description = "Retrieve all orders history")
-    public List<OrderDto> getAll(Pageable pageable) throws UserNotAuthenticatedException {
-        return orderService.getAll(pageable);
+    public List<OrderDto> getAll(Pageable pageable, Authentication authentication) {
+        return orderService.getAll(pageable, authentication);
     }
 
     @PatchMapping("/{id}")

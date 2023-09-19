@@ -10,18 +10,23 @@ import org.springframework.data.repository.query.Param;
 
 public interface OrderItemsRepository extends JpaRepository<OrderItem, Long> {
 
-    @Query("SELECT oi FROM OrderItem oi LEFT JOIN FETCH oi.order")
-    List<OrderItem> findAllWithOrder();
+    @Query("SELECT oi FROM OrderItem oi "
+            + "LEFT JOIN FETCH oi.order o "
+            + "WHERE oi.id = :itemId AND oi.order = :order AND o.user.id = :userId")
+    Optional<OrderItem> findByIdAndOrder(@Param("itemId") Long itemId,
+                                         @Param("order") Order order,
+                                         @Param("userId") Long userId);
 
-    @Query("SELECT oi FROM OrderItem oi WHERE oi.id = :itemId AND oi.order = :order")
-    Optional<OrderItem> findByIdAndOrder(@Param("itemId") Long itemId, @Param("order") Order order);
-
-    @Query("SELECT oi FROM OrderItem oi WHERE oi.order = :order")
-    List<OrderItem> findByOrder(@Param("order") Order order);
+    @Query("SELECT oi FROM OrderItem oi "
+            + "LEFT JOIN FETCH oi.order o "
+            + "WHERE oi.order = :order AND o.user.id = :userId ")
+    List<OrderItem> findByOrder(@Param("order") Order order,
+                                @Param("userId") Long userId);
 
     @Query("SELECT oi FROM OrderItem oi "
             + "LEFT JOIN FETCH oi.order o "
             + "WHERE o.id IN :orderIds AND o.user.id = :userId")
-    List<OrderItem> findAllByOrderIdInAndUserId(List<Long> orderIds, Long userId);
+    List<OrderItem> findAllByOrderIdInAndUserId(@Param("orderIds") List<Long> orderIds,
+                                                @Param("userId") Long userId);
 
 }

@@ -6,6 +6,7 @@ import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
 import com.parkhomovsky.bookstore.dto.order.UpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.enums.Status;
+import com.parkhomovsky.bookstore.exception.EmptyShoppingCartException;
 import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
 import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.mapper.OrderItemsMapper;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -45,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto)
-            throws UserNotAuthenticatedException {
+            throws UserNotAuthenticatedException, EmptyShoppingCartException {
         Set<OrderItem> orderItems = getOrderItemsDtoFromShoppingCart();
         Order order = buildOrder(orderPlaceRequestDto.getShippingAddress(), orderItems);
         orderRepository.save(order);
@@ -61,25 +63,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDto> getAll(Pageable pageable) throws UserNotAuthenticatedException {
-        User currentUser = (User) userService.getUser();
+    public List<OrderDto> getAll(Pageable pageable, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
         List<Order> orders = orderRepository.findAllByUser(currentUser);
-        List<Long> orderIds = orders.stream()
-                .map(Order::getId)
-                .collect(Collectors.toList());
-        List<OrderItem> orderItems = orderItemsRepository
-                .findAllByOrderIdInAndUserId(orderIds, currentUser.getId());
-        Map<Long, List<OrderItem>> orderItemMap = orderItems.stream()
-                .collect(Collectors.groupingBy(orderItem -> orderItem.getOrder().getId()));
-        List<OrderDto> orderDtos = new ArrayList<>();
-        for (Order order : orders) {
-            List<OrderItem> orderItemsForOrder =
-                    orderItemMap.getOrDefault(order.getId(), Collections.emptyList());
-            List<OrderItemDto> orderItemDtos = orderItemsToOrderItemsDto(orderItemsForOrder);
-            OrderDto orderDto = buildOrderDto(order, orderItemDtos);
-            orderDtos.add(orderDto);
-        }
-        return orderDtos;
+        List<OrderItem> orderItems = getUserOrderItems(currentUser, orders);
+        return orderItemsToOrderDtos(orders, orderItems);
     }
 
     @Override
@@ -95,28 +83,62 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId) {
+    public List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId)
+            throws UserNotAuthenticatedException {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
-        List<OrderItem> orderItems = orderItemsRepository.findByOrder(order);
+        Long currentUserId = userService.getUserId();
+        List<OrderItem> orderItems = orderItemsRepository.findByOrder(order, currentUserId);
         return orderItemsToOrderItemsDto(orderItems);
     }
 
     @Override
-    public OrderItemDto getOrderItemByidDto(Long orderId, Long itemId) {
+    public OrderItemDto getOrderItemByidDto(Long orderId, Long itemId)
+            throws UserNotAuthenticatedException {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
-        Optional<OrderItem> orderItem = orderItemsRepository.findByIdAndOrder(itemId, order);
+        Long currentUserId = userService.getUserId();
+        Optional<OrderItem> orderItem =
+                orderItemsRepository.findByIdAndOrder(itemId, order, currentUserId);
         return orderItemsMapper.toDto(orderItem.orElseThrow(() ->
                 new EntityNotFoundException("Order item with id "
                         + itemId + " not found in order with id " + orderId)));
     }
 
-    private Set<OrderItem> getOrderItemsDtoFromShoppingCart() throws UserNotAuthenticatedException {
+    private List<OrderItem> getUserOrderItems(User currentUser, List<Order> orders) {
+        List<Long> orderIds = orders.stream()
+                .map(Order::getId)
+                .collect(Collectors.toList());
+        return orderItemsRepository
+                .findAllByOrderIdInAndUserId(orderIds, currentUser.getId());
+    }
+
+    private List<OrderDto> orderItemsToOrderDtos(List<Order> orders, List<OrderItem> orderItems) {
+        Map<Long, List<OrderItem>> orderItemMap = orderItems.stream()
+                .collect(Collectors.groupingBy(orderItem -> orderItem.getOrder().getId()));
+        List<OrderDto> orderDtos = new ArrayList<>();
+        for (Order order : orders) {
+            List<OrderItem> orderItemsForOrder =
+                    orderItemMap.getOrDefault(order.getId(), Collections.emptyList());
+            List<OrderItemDto> orderItemDtos = orderItemsToOrderItemsDto(orderItemsForOrder);
+            OrderDto orderDto = buildOrderDto(order, orderItemDtos);
+            orderDtos.add(orderDto);
+        }
+        return orderDtos;
+    }
+
+    private Set<OrderItem> getOrderItemsDtoFromShoppingCart()
+            throws UserNotAuthenticatedException, EmptyShoppingCartException {
         ShoppingCart shoppingCart = shoppingCartService.getUserShoppingCart();
         Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
+        if (cartItems.isEmpty()) {
+            throw new EmptyShoppingCartException(
+                    "Empty shopping cart during processing order. "
+                            + "Shopping cart id: " + shoppingCart.getId());
+        }
+        shoppingCartService.clearShoppingCart();
         return cartItems.stream()
                 .map(orderItemsMapper::toModel)
                 .collect(Collectors.toSet());

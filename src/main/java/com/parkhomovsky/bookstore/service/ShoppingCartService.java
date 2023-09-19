@@ -14,4 +14,6 @@ public interface ShoppingCartService {
             throws UserNotAuthenticatedException, EntityNotFoundException;
 
     Set<CartItem> getCartItemsSetForShoppingCart(ShoppingCart shoppingCart);
+
+    void clearShoppingCart() throws UserNotAuthenticatedException;
 }
