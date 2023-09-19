@@ -6,14 +6,15 @@ import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.model.CartItem;
 import com.parkhomovsky.bookstore.model.ShoppingCart;
 import java.util.Set;
+import com.parkhomovsky.bookstore.model.ShoppingCart;
 
 public interface ShoppingCartService {
     ShoppingCartDto getUserShoppingCartDto() throws UserNotAuthenticatedException;
 
-    ShoppingCart getUserShoppingCart()
-            throws UserNotAuthenticatedException, EntityNotFoundException;
-
     Set<CartItem> getCartItemsSetForShoppingCart(ShoppingCart shoppingCart);
 
     void clearShoppingCart() throws UserNotAuthenticatedException;
+    ShoppingCartDto getUserShoppingCart();
+
+    ShoppingCart getShoppingCart();
 }

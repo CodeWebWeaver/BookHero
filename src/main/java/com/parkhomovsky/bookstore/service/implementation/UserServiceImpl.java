@@ -4,7 +4,6 @@ import com.parkhomovsky.bookstore.dto.user.UserRegistrationRequestDto;
 import com.parkhomovsky.bookstore.dto.user.UserRegistrationResponseDto;
 import com.parkhomovsky.bookstore.enums.RoleName;
 import com.parkhomovsky.bookstore.exception.RegistrationException;
-import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.mapper.UserMapper;
 import com.parkhomovsky.bookstore.model.Role;
 import com.parkhomovsky.bookstore.model.User;
@@ -41,21 +40,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetails getUser() throws UserNotAuthenticatedException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new UserNotAuthenticatedException("User not authenticated");
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDetails) {
-            return (UserDetails) principal;
-        } else {
-            throw new UserNotAuthenticatedException("User not authenticated");
-        }
+    public Long getUserId() {
+        return ((User) getUser()).getId();
     }
 
     @Override
-    public Long getUserId() throws UserNotAuthenticatedException {
-        return ((User) getUser()).getId();
+    public UserDetails getUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        return (UserDetails) principal;
     }
 }

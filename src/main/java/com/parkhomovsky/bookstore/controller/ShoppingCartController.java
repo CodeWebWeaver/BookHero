@@ -4,8 +4,6 @@ import com.parkhomovsky.bookstore.dto.cart.ShoppingCartDto;
 import com.parkhomovsky.bookstore.dto.item.AddCartItemRequestDto;
 import com.parkhomovsky.bookstore.dto.item.CartItemDto;
 import com.parkhomovsky.bookstore.dto.item.CreateCartItemRequestDto;
-import com.parkhomovsky.bookstore.exception.InvalidRequestParametersException;
-import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.service.CartItemService;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,8 +33,8 @@ public class ShoppingCartController {
     @GetMapping
     @Operation(summary = "Retrieve user`s shopping cart",
             description = "Retrieve cart and items set in shopping cart")
-    public ShoppingCartDto getUserShoppingCart() throws UserNotAuthenticatedException {
-        return shoppingCartService.getUserShoppingCartDto();
+    public ShoppingCartDto getUserShoppingCart() {
+        return shoppingCartService.getUserShoppingCart();
     }
 
     @PostMapping
@@ -44,8 +42,7 @@ public class ShoppingCartController {
     @Operation(summary = "Create new shopping cart item",
             description = "Create a new cart item and add it to the shopping cart")
     public CartItemDto createNewCartItem(
-            @RequestBody @Valid CreateCartItemRequestDto createCartItemRequestDto)
-            throws UserNotAuthenticatedException, InvalidRequestParametersException {
+            @RequestBody @Valid CreateCartItemRequestDto createCartItemRequestDto) {
         return cartItemService.create(createCartItemRequestDto);
     }
 
@@ -54,16 +51,14 @@ public class ShoppingCartController {
             description = "Update quantity field for item in database")
     public CartItemDto updateCartItemQuantity(@PathVariable Long cartItemId,
                                       @Valid @RequestBody
-                                      AddCartItemRequestDto addCartItemRequestDto)
-            throws UserNotAuthenticatedException, InvalidRequestParametersException {
+                                      AddCartItemRequestDto addCartItemRequestDto) {
         return cartItemService.add(cartItemId, addCartItemRequestDto);
     }
 
     @DeleteMapping("cart-items/{cartItemId}")
     @Operation(summary = "Remove item from Shopping Cart",
             description = "Delete item from current user`s shopping cart")
-    public CartItemDto deleteCartItem(@PathVariable Long cartItemId)
-            throws UserNotAuthenticatedException, InvalidRequestParametersException {
+    public CartItemDto deleteCartItem(@PathVariable Long cartItemId) {
         return cartItemService.delete(cartItemId);
     }
 }

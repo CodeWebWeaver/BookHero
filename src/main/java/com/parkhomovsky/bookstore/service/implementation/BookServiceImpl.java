@@ -88,6 +88,13 @@ public class BookServiceImpl implements BookService {
                 .collect(Collectors.toList());
     }
 
+    public Book getBookFromId(Long id) {
+        Optional<Book> bookById = bookRepository.findByIdWithCategory(id);
+        return bookById.orElseThrow(() ->
+                new EntityNotFoundException("Can`t find any book with id: "
+                + id + " during add cart item to cart"));
+    }
+
     private Book includeCategoryByIdInBook(Book book, Set<Long> categoryIds) {
         List<Category> categories = categoryRepository.findAllById(categoryIds);
         if (categoryIds.isEmpty()) {
