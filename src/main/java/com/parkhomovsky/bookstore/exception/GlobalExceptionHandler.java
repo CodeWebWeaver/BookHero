@@ -1,12 +1,11 @@
 package com.parkhomovsky.bookstore.exception;
 
+import com.parkhomovsky.bookstore.dto.exception.ErrorResponseDto;
+import com.parkhomovsky.bookstore.dto.exception.ErrorResponseListDto;
 import io.jsonwebtoken.JwtException;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import lombok.NonNull;
-import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,9 +24,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final String TIMESTAMP = "timestamp";
-    private static final String STATUS = "status";
-    private static final String ERROR = "error";
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -35,28 +32,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull HttpStatusCode status,
             @NonNull WebRequest request
     ) {
-        Map<String, Object> body = new LinkedMap<>();
-        body.put(TIMESTAMP, LocalDateTime.now());
-        body.put(STATUS, HttpStatus.BAD_REQUEST);
+        ErrorResponseListDto errorResponse = new ErrorResponseListDto();
+        errorResponse.setTimestamp(LocalDateTime.now());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST);
         List<String> errors = ex.getBindingResult().getAllErrors().stream()
                 .map(this::getErrorMessage)
                 .toList();
-        body.put(ERROR, errors);
-        return new ResponseEntity<>(body, headers, status);
+        errorResponse.setError(errors);
+        return new ResponseEntity<>(errorResponse, headers, status);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> handleUniqueDataDuplicate(DataIntegrityViolationException ex) {
         Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "An error occurred while processing the request.";
-        if (rootCause != null) {
-            errorMessage = "Error: " + rootCause.getMessage();
-        }
-        Map<String, Object> errorResponse = new LinkedHashMap<>();
-        errorResponse.put(TIMESTAMP, LocalDateTime.now());
-        errorResponse.put(STATUS, HttpStatus.CONFLICT);
-        errorResponse.put(ERROR, errorMessage);
-
+        String errorMessage = "An error occurred while processing the request. "
+                + "You are attempting to add an item "
+                + "that violates a unique constraint in the database";
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.CONFLICT);
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
@@ -64,40 +57,40 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleRegistrationException(
             RegistrationException ex
     ) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST);
-        body.put("error", ex.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        String errorMessage = "Entered wrong data for registration";
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDeniedException(
             AccessDeniedException ex
     ) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.FORBIDDEN);
-        body.put("error", ex.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        String errorMessage = "User does not have access for this action";
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(JwtException.class)
     protected ResponseEntity<Object> handleJwtException(JwtException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.FORBIDDEN);
-        body.put("error", ex.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        String errorMessage = "User not authenticated: Error during proceeding JWT";
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(UserNotAuthenticatedException.class)
-    protected ResponseEntity<Object> handleJwtException(UserNotAuthenticatedException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.FORBIDDEN);
-        body.put("error", ex.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    @ExceptionHandler(BadCredentialsException.class)
+    protected ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        String errorMessage = "User not authenticated: Wrong data entered";
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(InvalidRequestParametersException.class)
@@ -106,14 +99,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         Throwable rootCause = ExceptionUtils.getRootCause(ex);
         String errorMessage = "An error occurred while proceeding request data.";
-        if (rootCause != null) {
-            errorMessage = "Error: Wrong request data. " + rootCause.getMessage();
-        }
-        Map<String, Object> errorMessageBody = new LinkedHashMap<>();
-        errorMessageBody.put("timestamp", LocalDateTime.now());
-        errorMessageBody.put("status", HttpStatus.FORBIDDEN);
-        errorMessageBody.put("error", errorMessage);
-        return new ResponseEntity<>(errorMessageBody, HttpStatus.BAD_REQUEST);
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -121,15 +109,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             EntityNotFoundException ex
     ) {
         Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "An error occurred while proceeding request data.";
+        String errorMessage = "An error occurred while proceeding data from database. "
+                + "Nothing found by provided parameters";
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    private ErrorResponseDto getErrorMessageBody(String errorMessage,
+                                                    Throwable rootCause,
+                                                    HttpStatus httpStatus) {
         if (rootCause != null) {
             errorMessage = "Error: " + rootCause.getMessage();
         }
-        Map<String, Object> errorMessageBody = new LinkedHashMap<>();
-        errorMessageBody.put("timestamp", LocalDateTime.now());
-        errorMessageBody.put("status", HttpStatus.NOT_FOUND);
-        errorMessageBody.put("error", errorMessage);
-        return new ResponseEntity<>(errorMessageBody, HttpStatus.NOT_FOUND);
+        ErrorResponseDto errorResponse = new ErrorResponseDto();
+        errorResponse.setTimestamp(LocalDateTime.now());
+        errorResponse.setStatus(HttpStatus.CONFLICT);
+        errorResponse.setError(errorMessage);
+        return errorResponse;
     }
 
     private String getErrorMessage(ObjectError ex) {

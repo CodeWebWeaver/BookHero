@@ -1,19 +1,15 @@
 package com.parkhomovsky.bookstore.service.implementation;
 
-import com.parkhomovsky.bookstore.dto.cart.ShoppingCartDto;
 import com.parkhomovsky.bookstore.dto.item.AddCartItemRequestDto;
 import com.parkhomovsky.bookstore.dto.item.CartItemDto;
 import com.parkhomovsky.bookstore.dto.item.CreateCartItemRequestDto;
 import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
-import com.parkhomovsky.bookstore.exception.InvalidRequestParametersException;
-import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.mapper.CartItemMapper;
-import com.parkhomovsky.bookstore.mapper.ShoppingCartMapper;
 import com.parkhomovsky.bookstore.model.Book;
 import com.parkhomovsky.bookstore.model.CartItem;
 import com.parkhomovsky.bookstore.model.ShoppingCart;
-import com.parkhomovsky.bookstore.repository.book.BookRepository;
 import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
+import com.parkhomovsky.bookstore.service.BookService;
 import com.parkhomovsky.bookstore.service.CartItemService;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
 import java.util.HashSet;
@@ -29,63 +25,44 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class CartItemServiceImpl implements CartItemService {
     private final CartItemRepository cartItemRepository;
-    private final BookRepository bookRepository;
     private final CartItemMapper cartItemMapper;
     private final ShoppingCartService shoppingCartService;
-    private final ShoppingCartMapper shoppingCartMapper;
+    private final BookService bookService;
 
     @Override
-    public CartItemDto add(Long cartItemId, AddCartItemRequestDto addCartItemRequestDto)
-            throws UserNotAuthenticatedException {
-        ShoppingCart shoppingCart = getShoppingCart();
-        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
-        Optional<CartItem> possibleCartItem = findCartItemById(cartItems, cartItemId);
+    public CartItemDto add(Long cartItemId, AddCartItemRequestDto addCartItemRequestDto) {
+        Optional<CartItem> possibleCartItem = getCartItemById(cartItemId);
         if (possibleCartItem.isPresent()) {
-            CartItem presentCartItem = possibleCartItem.get();
-            presentCartItem.setQuantity(presentCartItem
-                    .getQuantity() + addCartItemRequestDto.getQuantity());
-            cartItemRepository.save(presentCartItem);
-            return cartItemMapper.toDto(presentCartItem);
+            CartItem cartItem = addQuantityToCartItem(possibleCartItem.get(),
+                    addCartItemRequestDto.getQuantity());
+            cartItemRepository.save(cartItem);
+            return cartItemMapper.toDto(cartItem);
         }
-        throw new EntityNotFoundException("No item found with provided id");
+        throw new EntityNotFoundException("No item found with provided cartItemId: "
+                + cartItemId);
     }
 
     @Override
-    public CartItemDto create(CreateCartItemRequestDto cartItemDto)
-            throws UserNotAuthenticatedException, InvalidRequestParametersException {
-        ShoppingCart shoppingCart = getShoppingCart();
-        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
-        Optional<CartItem> possibleCartItem =
-                findCartItemByBookId(cartItems, cartItemDto.getBookId());
-        CartItem requestCartItem = cartItemMapper.toModel(cartItemDto);
+    public CartItemDto create(CreateCartItemRequestDto cartItemDto) {
+        Optional<CartItem> possibleCartItem = getCartItemByBookId(cartItemDto.getBookId());
         if (possibleCartItem.isPresent()) {
-            CartItem presentCartItem = possibleCartItem.get();
-            presentCartItem.setQuantity(presentCartItem
-                    .getQuantity() + requestCartItem.getQuantity());
-            cartItemRepository.save(presentCartItem);
-            return cartItemMapper.toDto(presentCartItem);
+            CartItem cartItem = addQuantityToCartItem(possibleCartItem.get(),
+                    cartItemDto.getQuantity());
+            cartItemRepository.save(cartItem);
+            return cartItemMapper.toDto(cartItem);
         }
-        try {
-            Book bookFromId = getBookFromId(requestCartItem.getBook().getId());
-            requestCartItem.setBook(bookFromId);
-            requestCartItem.setShoppingCart(shoppingCart);
-            CartItem savedCartItem = cartItemRepository.save(requestCartItem);
-            return cartItemMapper.toDto(savedCartItem);
-        } catch (EntityNotFoundException e) {
-            throw new InvalidRequestParametersException("Wrong book id: "
-                    + cartItemDto.getBookId());
-        }
-
+        CartItem requestCartItem = createNewCartItem(cartItemDto);
+        CartItem savedCartItem = cartItemRepository.save(requestCartItem);
+        return cartItemMapper.toDto(savedCartItem);
     }
 
     @Override
-    public CartItemDto delete(Long cartItemId)
-            throws UserNotAuthenticatedException, InvalidRequestParametersException {
-        ShoppingCart shoppingCart = getShoppingCart();
+    public CartItemDto delete(Long cartItemId) {
+        ShoppingCart shoppingCart = shoppingCartService.getShoppingCart();
         Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
         Optional<CartItem> possibleCartItem = findCartItemById(cartItems, cartItemId);
         if (possibleCartItem.isEmpty()) {
-            throw new InvalidRequestParametersException(
+            throw new EntityNotFoundException(
                     "Cart item with provided id not found. id:" + cartItemId);
         }
         CartItem deleteCartItem = possibleCartItem.get();
@@ -95,24 +72,9 @@ public class CartItemServiceImpl implements CartItemService {
 
     private Set<CartItem> getCartItemsListForShoppingCart(ShoppingCart shoppingCart) {
         List<CartItem> cartItemsList =
-                cartItemRepository.findByShoppingCartId(shoppingCart.getId());
+                cartItemRepository.findAllByShoppingCartId(shoppingCart.getId());
         cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
         return new HashSet<>(cartItemsList);
-    }
-
-    private ShoppingCart getShoppingCart() throws UserNotAuthenticatedException {
-        ShoppingCartDto userShoppingCartDto = shoppingCartService.getUserShoppingCart();
-        return shoppingCartMapper
-                .toModel(userShoppingCartDto);
-    }
-
-    private Book getBookFromId(Long id) {
-        Optional<Book> bookById = bookRepository.findByIdWithCategory(id);
-        if (bookById.isEmpty()) {
-            throw new EntityNotFoundException("Can`t find any book with id: "
-                    + id + " during add cart item to cart");
-        }
-        return bookById.get();
     }
 
     private Optional<CartItem> findCartItemById(Set<CartItem> cartItemsList, Long cartItemId) {
@@ -125,5 +87,31 @@ public class CartItemServiceImpl implements CartItemService {
         return cartItemsList.stream()
                 .filter(cartItem -> cartItem.getBook().getId().equals(bookId))
                 .findFirst();
+    }
+
+    private CartItem createNewCartItem(CreateCartItemRequestDto cartItemDto) {
+        CartItem requestCartItem = cartItemMapper.toModel(cartItemDto);
+        Book bookFromId = bookService.getBookFromId(requestCartItem.getBook().getId());
+        requestCartItem.setBook(bookFromId);
+        requestCartItem.setShoppingCart(shoppingCartService.getShoppingCart());
+        return requestCartItem;
+    }
+
+    private CartItem addQuantityToCartItem(CartItem cartItem, int quantity) {
+        cartItem.setQuantity(cartItem
+                .getQuantity() + quantity);
+        return cartItem;
+    }
+
+    private Optional<CartItem> getCartItemById(Long cartItemId) {
+        ShoppingCart shoppingCart = shoppingCartService.getShoppingCart();
+        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
+        return findCartItemById(cartItems, cartItemId);
+    }
+
+    private Optional<CartItem> getCartItemByBookId(Long bookId) {
+        ShoppingCart shoppingCart = shoppingCartService.getShoppingCart();
+        Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
+        return findCartItemByBookId(cartItems, bookId);
     }
 }

@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.Query;
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     @Query("SELECT c FROM CartItem c JOIN c.shoppingCart sc WHERE sc.id = :shoppingCartId")
-    List<CartItem> findByShoppingCartId(Long shoppingCartId);
+    List<CartItem> findAllByShoppingCartId(Long shoppingCartId);
 }
