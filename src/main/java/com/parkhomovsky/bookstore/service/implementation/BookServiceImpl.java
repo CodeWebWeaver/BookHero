@@ -89,7 +89,7 @@ public class BookServiceImpl implements BookService {
     }
 
     public Book getBookFromId(Long id) {
-        Optional<Book> bookById = bookRepository.findByIdWithCategory(id);
+        Optional<Book> bookById = bookRepository.findById(id);
         return bookById.orElseThrow(() ->
                 new EntityNotFoundException("Can`t find any book with id: "
                 + id + " during add cart item to cart"));

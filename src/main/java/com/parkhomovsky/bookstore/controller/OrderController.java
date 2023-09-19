@@ -6,7 +6,6 @@ import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
 import com.parkhomovsky.bookstore.dto.order.UpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.exception.EmptyShoppingCartException;
-import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,7 +38,7 @@ public class OrderController {
     @Operation(summary = "Place new order",
             description = "Create a new order and add it to the database")
     public OrderDto placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto)
-            throws UserNotAuthenticatedException, EmptyShoppingCartException {
+            throws EmptyShoppingCartException {
         return orderService.process(orderPlaceRequestDto);
     }
 
@@ -63,8 +62,7 @@ public class OrderController {
     @GetMapping("/{orderId}/items")
     @Operation(summary = "Get all orders by orderId",
             description = "Retrieve all orders for a specific order")
-    public List<OrderItemDto> getAllFromOrder(@PathVariable Long orderId, Pageable pageable)
-            throws UserNotAuthenticatedException {
+    public List<OrderItemDto> getAllFromOrder(@PathVariable Long orderId, Pageable pageable) {
         return orderService.getOrderItemsDto(pageable, orderId);
     }
 
@@ -72,8 +70,7 @@ public class OrderController {
     @Operation(summary = "Get item by orderId and itemId",
             description = "Retrieve a specific OrderItem within an order")
     public OrderItemDto getItemFromOrder(@PathVariable Long orderId,
-                                             @PathVariable Long itemId)
-            throws UserNotAuthenticatedException {
+                                             @PathVariable Long itemId) {
         return orderService.getOrderItemByidDto(orderId, itemId);
     }
 }

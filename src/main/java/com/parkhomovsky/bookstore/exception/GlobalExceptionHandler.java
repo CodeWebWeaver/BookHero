@@ -112,7 +112,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String errorMessage = "An error occurred while proceeding data from database. "
                 + "Nothing found by provided parameters";
         ErrorResponseDto errorResponse =
-                getErrorMessageBody(errorMessage, rootCause, HttpStatus.BAD_REQUEST);
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EmptyShoppingCartException.class)
+    public ResponseEntity<Object> handleEmptyShoppingCartException(
+            EmptyShoppingCartException ex
+    ) {
+        Throwable rootCause = ExceptionUtils.getRootCause(ex);
+        String errorMessage = "An error occurred while proceeding shopping cart data.";
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody(errorMessage, rootCause, HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
@@ -124,19 +135,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
         ErrorResponseDto errorResponse = new ErrorResponseDto();
         errorResponse.setTimestamp(LocalDateTime.now());
-        errorResponse.setStatus(HttpStatus.CONFLICT);
+        errorResponse.setStatus(httpStatus);
         errorResponse.setError(errorMessage);
         return errorResponse;
-    }
-
-    @ExceptionHandler(EmptyShoppingCartException.class)
-    public ResponseEntity<Object> handleEmptyShoppingCartException(
-            EmptyShoppingCartException ex
-    ) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "An error occurred while proceeding shopping cart data.";
-        return new ResponseEntity<>(getErrorMessageBody(
-                errorMessage, rootCause, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
     }
 
     private String getErrorMessage(ObjectError ex) {

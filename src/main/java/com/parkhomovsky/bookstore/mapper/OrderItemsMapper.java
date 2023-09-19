@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(config = MapperConfiguration.class)
 public interface OrderItemsMapper {
+    @Mapping(target = "order", ignore = true)
     OrderItem toModel(CartItem cartItem);
 
     @Mapping(target = "bookId", source = "book.id")

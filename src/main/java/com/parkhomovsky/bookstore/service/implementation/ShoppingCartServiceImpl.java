@@ -11,9 +11,9 @@ import com.parkhomovsky.bookstore.model.User;
 import com.parkhomovsky.bookstore.repository.cart.ShoppingCartRepository;
 import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
+import com.parkhomovsky.bookstore.service.UserService;
 import jakarta.transaction.Transactional;
 import java.util.HashSet;
-import com.parkhomovsky.bookstore.service.UserService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,7 +31,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final CartItemMapper cartItemMapper;
 
     @Override
-    public ShoppingCartDto getUserShoppingCart() throws EntityNotFoundException {
+    public ShoppingCartDto getUserShoppingCartDto() throws EntityNotFoundException {
         User user = (User) userService.getUser();
         Optional<ShoppingCart> shoppingCartOptional =
                 shoppingCartRepository.findByUsername(user.getUsername());
@@ -51,32 +51,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public ShoppingCart getUserShoppingCart()
-            throws UserNotAuthenticatedException, EntityNotFoundException {
-        String username = getUsernameFromAuthentication();
-        return findOrCreateShoppingCartForUser(username);
-    }
-
-    @Override
     public Set<CartItem> getCartItemsSetForShoppingCart(ShoppingCart shoppingCart) {
         List<CartItem> cartItemsList =
-                cartItemRepository.findByShoppingCartId(shoppingCart.getId());
+                cartItemRepository.findAllByShoppingCartId(shoppingCart.getId());
         cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
         return new HashSet<>(cartItemsList);
     }
 
     @Override
     @Transactional
-    public void clearShoppingCart() throws UserNotAuthenticatedException {
-        cartItemRepository.deleteAllByShoppingCartId(getUserShoppingCart().getId());
+    public void clearShoppingCart() {
+        cartItemRepository.deleteAllByShoppingCartId(getShoppingCart().getId());
     }
 
-    private String getUsernameFromAuthentication() throws UserNotAuthenticatedException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new UserNotAuthenticatedException("User not authenticated");
-        }
-        return authentication.getName();
     private List<CartItem> getCartItemsListForShoppingCart(ShoppingCart shoppingCart) {
         return cartItemRepository.findAllByShoppingCartId(shoppingCart.getId())
                 .stream()
@@ -86,7 +73,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCart getShoppingCart() {
-        ShoppingCartDto userShoppingCartDto = getUserShoppingCart();
+        ShoppingCartDto userShoppingCartDto = getUserShoppingCartDto();
         return shoppingCartMapper
                 .toModel(userShoppingCartDto);
     }

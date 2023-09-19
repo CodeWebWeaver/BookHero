@@ -12,6 +12,8 @@ import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
 import com.parkhomovsky.bookstore.service.BookService;
 import com.parkhomovsky.bookstore.service.CartItemService;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +33,11 @@ public class CartItemServiceImpl implements CartItemService {
     public CartItemDto add(Long cartItemId, AddCartItemRequestDto addCartItemRequestDto) {
         Optional<CartItem> possibleCartItem = getCartItemById(cartItemId);
         if (possibleCartItem.isPresent()) {
-            CartItem cartItem = addQuantityToCartItem(possibleCartItem.get(),
+            CartItem cartItem = possibleCartItem.get();
+            CartItem updatedCartItem = addQuantityToCartItem(cartItem,
                     addCartItemRequestDto.getQuantity());
-            cartItemRepository.save(cartItem);
-            return cartItemMapper.toDto(cartItem);
+            cartItemRepository.save(updatedCartItem);
+            return cartItemMapper.toDto(updatedCartItem);
         }
         throw new EntityNotFoundException("No item found with provided cartItemId: "
                 + cartItemId);

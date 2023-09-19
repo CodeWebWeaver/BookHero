@@ -8,7 +8,6 @@ import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.enums.Status;
 import com.parkhomovsky.bookstore.exception.EmptyShoppingCartException;
 import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
-import com.parkhomovsky.bookstore.exception.UserNotAuthenticatedException;
 import com.parkhomovsky.bookstore.mapper.OrderItemsMapper;
 import com.parkhomovsky.bookstore.mapper.OrderMapper;
 import com.parkhomovsky.bookstore.model.CartItem;
@@ -47,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto)
-            throws UserNotAuthenticatedException, EmptyShoppingCartException {
+            throws EmptyShoppingCartException {
         Set<OrderItem> orderItems = getOrderItemsDtoFromShoppingCart();
         Order order = buildOrder(orderPlaceRequestDto.getShippingAddress(), orderItems);
         orderRepository.save(order);
@@ -83,8 +82,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId)
-            throws UserNotAuthenticatedException {
+    public List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
@@ -94,8 +92,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderItemDto getOrderItemByidDto(Long orderId, Long itemId)
-            throws UserNotAuthenticatedException {
+    public OrderItemDto getOrderItemByidDto(Long orderId, Long itemId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
@@ -130,8 +127,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Set<OrderItem> getOrderItemsDtoFromShoppingCart()
-            throws UserNotAuthenticatedException, EmptyShoppingCartException {
-        ShoppingCart shoppingCart = shoppingCartService.getUserShoppingCart();
+            throws EmptyShoppingCartException {
+        ShoppingCart shoppingCart = shoppingCartService.getShoppingCart();
         Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
         if (cartItems.isEmpty()) {
             throw new EmptyShoppingCartException(
@@ -144,8 +141,7 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toSet());
     }
 
-    private Order buildOrder(String shippingAddress, Set<OrderItem> orderItems)
-            throws UserNotAuthenticatedException {
+    private Order buildOrder(String shippingAddress, Set<OrderItem> orderItems) {
         Order order = new Order();
         order.setShippingAddress(shippingAddress);
         order.setOrderDate(LocalDateTime.now());
