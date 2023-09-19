@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping("/place-order")
+    @PostMapping
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Place new order",
             description = "Create a new order and add it to the database")
