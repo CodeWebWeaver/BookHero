@@ -12,7 +12,8 @@ import org.springframework.security.core.Authentication;
 public interface OrderService {
     OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto);
 
-    StatusUpdateResponseDto updateStatus(Long orderId, OrderUpdateStatusRequest updateStatusRequest);
+    StatusUpdateResponseDto updateStatus(Long orderId,
+                                         OrderUpdateStatusRequest updateStatusRequest);
 
     List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId);
 
