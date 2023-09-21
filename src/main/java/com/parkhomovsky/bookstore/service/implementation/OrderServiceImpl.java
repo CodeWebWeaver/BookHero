@@ -3,7 +3,7 @@ package com.parkhomovsky.bookstore.service.implementation;
 import com.parkhomovsky.bookstore.dto.order.OrderDto;
 import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
 import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
-import com.parkhomovsky.bookstore.dto.order.UpdateResponseDto;
+import com.parkhomovsky.bookstore.dto.order.StatusUpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import com.parkhomovsky.bookstore.enums.Status;
 import com.parkhomovsky.bookstore.exception.EmptyShoppingCartException;
@@ -45,8 +45,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemsMapper orderItemsMapper;
 
     @Override
-    public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto)
-            throws EmptyShoppingCartException {
+    public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto) {
         Set<OrderItem> orderItems = getOrderItemsDtoFromShoppingCart();
         Order order = buildOrder(orderPlaceRequestDto.getShippingAddress(), orderItems);
         orderRepository.save(order);
@@ -70,8 +69,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public UpdateResponseDto updateStatus(Long orderId,
-                                          OrderUpdateStatusRequest updateStatusRequest) {
+    public StatusUpdateResponseDto updateStatus(Long orderId,
+                                                OrderUpdateStatusRequest updateStatusRequest) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
@@ -86,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
-        Long currentUserId = userService.getUserId();
+        Long currentUserId = userService.getAuthenticatedUserId();
         List<OrderItem> orderItems = orderItemsRepository.findByOrder(order, currentUserId);
         return orderItemsToOrderItemsDto(orderItems);
     }
@@ -96,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
-        Long currentUserId = userService.getUserId();
+        Long currentUserId = userService.getAuthenticatedUserId();
         Optional<OrderItem> orderItem =
                 orderItemsRepository.findByIdAndOrder(itemId, order, currentUserId);
         return orderItemsMapper.toDto(orderItem.orElseThrow(() ->
@@ -126,8 +125,7 @@ public class OrderServiceImpl implements OrderService {
         return orderDtos;
     }
 
-    private Set<OrderItem> getOrderItemsDtoFromShoppingCart()
-            throws EmptyShoppingCartException {
+    private Set<OrderItem> getOrderItemsDtoFromShoppingCart() {
         ShoppingCart shoppingCart = shoppingCartService.getShoppingCart();
         Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
         if (cartItems.isEmpty()) {
@@ -146,7 +144,7 @@ public class OrderServiceImpl implements OrderService {
         order.setShippingAddress(shippingAddress);
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(Status.PENDING);
-        order.setUser((User) userService.getUser());
+        order.setUser((User) userService.getAuthenticatedUser());
         order.setTotal(getTotalPrice(orderItems));
         order.setOrderItems(orderItems);
         return order;
@@ -156,7 +154,7 @@ public class OrderServiceImpl implements OrderService {
         return orderItems.stream()
                 .map(orderItem -> orderItem.getBook().getPrice()
                         .multiply(BigDecimal.valueOf(orderItem.getQuantity())))
-                .reduce(new BigDecimal("0.0"), BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private OrderDto buildOrderDto(Order order, List<OrderItemDto> orderItemsDtos) {

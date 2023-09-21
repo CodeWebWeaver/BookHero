@@ -9,7 +9,7 @@ public interface UserService {
     UserRegistrationResponseDto register(
             UserRegistrationRequestDto requestDto) throws RegistrationException;
 
-    UserDetails getUser();
+    UserDetails getAuthenticatedUser();
 
-    Long getUserId();
+    Long getAuthenticatedUserId();
 }

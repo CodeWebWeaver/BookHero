@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class AddCartItemRequestDto {
-    @NotNull
     @Min(value = 1, message = "Quantity should be at least 1 for creating")
     private int quantity;
 }

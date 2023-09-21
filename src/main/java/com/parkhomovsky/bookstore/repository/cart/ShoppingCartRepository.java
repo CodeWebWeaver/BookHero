@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Long> {
 
-    @Query("FROM ShoppingCart s LEFT JOIN FETCH s.cartItems WHERE s.user.email = :username")
-    Optional<ShoppingCart> findByUsername(String username);
+    @Query("FROM ShoppingCart s LEFT JOIN FETCH s.cartItems ci WHERE s.user.id = :id")
+    Optional<ShoppingCart> findByUserId(Long id);
 }

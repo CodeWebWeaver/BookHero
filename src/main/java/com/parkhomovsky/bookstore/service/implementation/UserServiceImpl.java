@@ -40,12 +40,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long getUserId() {
-        return ((User) getUser()).getId();
+    public Long getAuthenticatedUserId() {
+        return ((User) getAuthenticatedUser()).getId();
     }
 
     @Override
-    public UserDetails getUser() {
+    public UserDetails getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
         return (UserDetails) principal;

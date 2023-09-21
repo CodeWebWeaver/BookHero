@@ -32,9 +32,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto getUserShoppingCartDto() throws EntityNotFoundException {
-        User user = (User) userService.getUser();
+        User user = (User) userService.getAuthenticatedUser();
         Optional<ShoppingCart> shoppingCartOptional =
-                shoppingCartRepository.findByUsername(user.getUsername());
+                shoppingCartRepository.findByUserId(user.getId());
         return shoppingCartOptional
                 .map(this::buildExistShoppingCartDto)
                 .orElseGet(() -> createNewShoppingCartDto(user));

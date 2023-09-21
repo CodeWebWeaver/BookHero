@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class UpdateResponseDto {
+public class StatusUpdateResponseDto {
     private Long id;
     private Long userId;
     private LocalDateTime orderDate;

@@ -3,9 +3,8 @@ package com.parkhomovsky.bookstore.controller;
 import com.parkhomovsky.bookstore.dto.order.OrderDto;
 import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
 import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
-import com.parkhomovsky.bookstore.dto.order.UpdateResponseDto;
+import com.parkhomovsky.bookstore.dto.order.StatusUpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
-import com.parkhomovsky.bookstore.exception.EmptyShoppingCartException;
 import com.parkhomovsky.bookstore.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,8 +36,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Place new order",
             description = "Create a new order and add it to the database")
-    public OrderDto placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto)
-            throws EmptyShoppingCartException {
+    public OrderDto placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto) {
         return orderService.process(orderPlaceRequestDto);
     }
 
@@ -53,8 +51,8 @@ public class OrderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update order status",
             description = "Update order status by admin in database")
-    public UpdateResponseDto updateStatus(@PathVariable Long id,
-                                          @Valid @RequestBody
+    public StatusUpdateResponseDto updateStatus(@PathVariable Long id,
+                                                @Valid @RequestBody
                                  OrderUpdateStatusRequest orderUpdateStatusRequest) {
         return orderService.updateStatus(id, orderUpdateStatusRequest);
     }
