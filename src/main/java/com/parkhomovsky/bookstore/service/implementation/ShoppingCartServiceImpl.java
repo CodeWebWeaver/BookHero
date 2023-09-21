@@ -13,8 +13,6 @@ import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
 import com.parkhomovsky.bookstore.service.UserService;
 import jakarta.transaction.Transactional;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,35 +38,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .orElseGet(() -> createNewShoppingCartDto(user));
     }
 
-    private ShoppingCartDto buildExistShoppingCartDto(ShoppingCart shoppingCart) {
-        List<CartItem> cartItemsListForShoppingCart = getCartItemsListForShoppingCart(shoppingCart);
-        Set<CartItemDto> cartItemDtoSet = cartItemsListForShoppingCart.stream()
-                .map(cartItemMapper::toDto)
-                .collect(Collectors.toSet());
-        ShoppingCartDto shoppingCartDto = shoppingCartMapper.toDto(shoppingCart);
-        shoppingCartDto.setCartItemDtos(cartItemDtoSet);
-        return shoppingCartDto;
-    }
-
-    @Override
-    public Set<CartItem> getCartItemsSetForShoppingCart(ShoppingCart shoppingCart) {
-        List<CartItem> cartItemsList =
-                cartItemRepository.findAllByShoppingCartId(shoppingCart.getId());
-        cartItemsList.forEach(cartItem -> cartItem.setShoppingCart(shoppingCart));
-        return new HashSet<>(cartItemsList);
-    }
-
     @Override
     @Transactional
     public void clearShoppingCart() {
         cartItemRepository.deleteAllByShoppingCartId(getShoppingCart().getId());
-    }
-
-    private List<CartItem> getCartItemsListForShoppingCart(ShoppingCart shoppingCart) {
-        return cartItemRepository.findAllByShoppingCartId(shoppingCart.getId())
-                .stream()
-                .peek(cartItem -> cartItem.setShoppingCart(shoppingCart))
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -76,6 +49,23 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         ShoppingCartDto userShoppingCartDto = getUserShoppingCartDto();
         return shoppingCartMapper
                 .toModel(userShoppingCartDto);
+    }
+
+    @Override
+    public Set<CartItem> getCartItemsSetForShoppingCart(ShoppingCart shoppingCart) {
+        return cartItemRepository.findAllByShoppingCartId(shoppingCart.getId())
+                .stream()
+                .peek(cartItem -> cartItem.setShoppingCart(shoppingCart))
+                .collect(Collectors.toSet());
+    }
+
+    private ShoppingCartDto buildExistShoppingCartDto(ShoppingCart shoppingCart) {
+        Set<CartItemDto> cartItemDtoSet = getCartItemsSetForShoppingCart(shoppingCart).stream()
+                .map(cartItemMapper::toDto)
+                .collect(Collectors.toSet());
+        ShoppingCartDto shoppingCartDto = shoppingCartMapper.toDto(shoppingCart);
+        shoppingCartDto.setCartItemDtos(cartItemDtoSet);
+        return shoppingCartDto;
     }
 
     private ShoppingCartDto createNewShoppingCartDto(User user) {
