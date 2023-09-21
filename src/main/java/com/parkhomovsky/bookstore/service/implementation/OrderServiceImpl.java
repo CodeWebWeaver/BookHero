@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto) {
-        Set<OrderItem> orderItems = getOrderItemsDtoFromShoppingCart();
+        Set<OrderItem> orderItems = getOrderItemsFromShoppingCart();
         Order order = buildOrder(orderPlaceRequestDto.getShippingAddress(), orderItems);
         orderRepository.save(order);
         List<OrderItemDto> orderItemDtos = orderItems.stream()
@@ -125,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
         return orderDtos;
     }
 
-    private Set<OrderItem> getOrderItemsDtoFromShoppingCart() {
+    private Set<OrderItem> getOrderItemsFromShoppingCart() {
         ShoppingCart shoppingCart = shoppingCartService.getShoppingCart();
         Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
         if (cartItems.isEmpty()) {
