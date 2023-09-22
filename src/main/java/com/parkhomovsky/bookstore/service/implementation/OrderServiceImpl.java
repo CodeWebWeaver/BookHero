@@ -134,7 +134,7 @@ public class OrderServiceImpl implements OrderService {
         }
         shoppingCartService.clearShoppingCart();
         return cartItems.stream()
-                .map(orderItemsMapper::CartItemtoOrderItem)
+                .map(orderItemsMapper::cartItemToOrderItem)
                 .collect(Collectors.toSet());
     }
 
