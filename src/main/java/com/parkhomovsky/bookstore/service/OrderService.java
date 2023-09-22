@@ -10,14 +10,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
 public interface OrderService {
-    OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto);
+    OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto,
+                     Authentication authentication);
 
     StatusUpdateResponseDto updateStatus(Long orderId,
                                          OrderUpdateStatusRequest updateStatusRequest);
 
-    List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId);
+    List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId,
+                                        Authentication authentication);
 
-    OrderItemDto getOrderItemByidDto(Long orderId, Long itemId);
+    OrderItemDto getOrderItemByidDto(Long orderId, Long itemId,
+                                     Authentication authentication);
 
     List<OrderDto> getAll(Pageable pageable, Authentication authentication);
 }

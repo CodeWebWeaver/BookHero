@@ -36,8 +36,9 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Place new order",
             description = "Create a new order and add it to the database")
-    public OrderDto placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto) {
-        return orderService.process(orderPlaceRequestDto);
+    public OrderDto placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto,
+                               Authentication authentication) {
+        return orderService.process(orderPlaceRequestDto, authentication);
     }
 
     @GetMapping
@@ -60,15 +61,17 @@ public class OrderController {
     @GetMapping("/{orderId}/items")
     @Operation(summary = "Get all orders by orderId",
             description = "Retrieve all orders for a specific order")
-    public List<OrderItemDto> getAllFromOrder(@PathVariable Long orderId, Pageable pageable) {
-        return orderService.getOrderItemsDto(pageable, orderId);
+    public List<OrderItemDto> getAllFromOrder(@PathVariable Long orderId, Pageable pageable,
+                                              Authentication authentication) {
+        return orderService.getOrderItemsDto(pageable, orderId, authentication);
     }
 
     @GetMapping("/{orderId}/items/{itemId}")
     @Operation(summary = "Get item by orderId and itemId",
             description = "Retrieve a specific OrderItem within an order")
     public OrderItemDto getItemFromOrder(@PathVariable Long orderId,
-                                             @PathVariable Long itemId) {
-        return orderService.getOrderItemByidDto(orderId, itemId);
+                                             @PathVariable Long itemId,
+                                         Authentication authentication) {
+        return orderService.getOrderItemByidDto(orderId, itemId, authentication);
     }
 }

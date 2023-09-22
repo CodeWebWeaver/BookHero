@@ -9,9 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.user = :user")
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems "
+            + "WHERE o.user = :user")
     List<Order> findAllByUserWithItems(User user);
 
-    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems WHERE o.id = :orderId")
-    Optional<Order> findByIdWithItems(Long orderId);
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.orderItems "
+            + "WHERE o.id = :orderId AND o.user = :user")
+    Optional<Order> findByUserAndIdWithItems(Long orderId, User user);
 }
