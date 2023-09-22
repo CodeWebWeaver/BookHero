@@ -12,6 +12,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -24,6 +26,8 @@ public class CartItem {
     private Long id;
     @JoinColumn(name = "shopping_cart_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private ShoppingCart shoppingCart;
     @OneToOne(optional = false)
     private Book book;

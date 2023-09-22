@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -39,5 +41,7 @@ public class Order {
     @Column(name = "shipping_address", nullable = false)
     private String shippingAddress;
     @OneToMany(mappedBy = "order")
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<OrderItem> orderItems;
 }

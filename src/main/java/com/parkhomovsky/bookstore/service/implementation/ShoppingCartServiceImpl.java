@@ -5,7 +5,6 @@ import com.parkhomovsky.bookstore.dto.item.CartItemDto;
 import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
 import com.parkhomovsky.bookstore.mapper.CartItemMapper;
 import com.parkhomovsky.bookstore.mapper.ShoppingCartMapper;
-import com.parkhomovsky.bookstore.model.CartItem;
 import com.parkhomovsky.bookstore.model.ShoppingCart;
 import com.parkhomovsky.bookstore.model.User;
 import com.parkhomovsky.bookstore.repository.cart.ShoppingCartRepository;
@@ -46,21 +45,14 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCart getShoppingCart() {
-        ShoppingCartDto userShoppingCartDto = getUserShoppingCartDto();
-        return shoppingCartMapper
-                .toModel(userShoppingCartDto);
-    }
-
-    @Override
-    public Set<CartItem> getCartItemsSetForShoppingCart(ShoppingCart shoppingCart) {
-        return cartItemRepository.findAllByShoppingCartId(shoppingCart.getId())
-                .stream()
-                .peek(cartItem -> cartItem.setShoppingCart(shoppingCart))
-                .collect(Collectors.toSet());
+        User user = (User) userService.getAuthenticatedUser();
+        Optional<ShoppingCart> shoppingCartOptional =
+                shoppingCartRepository.findByUserId(user.getId());
+        return shoppingCartOptional.orElseGet(() -> createNewShoppingCart(user));
     }
 
     private ShoppingCartDto buildExistShoppingCartDto(ShoppingCart shoppingCart) {
-        Set<CartItemDto> cartItemDtoSet = getCartItemsSetForShoppingCart(shoppingCart).stream()
+        Set<CartItemDto> cartItemDtoSet = shoppingCart.getCartItems().stream()
                 .map(cartItemMapper::toDto)
                 .collect(Collectors.toSet());
         ShoppingCartDto shoppingCartDto = shoppingCartMapper.toDto(shoppingCart);
@@ -69,8 +61,12 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     private ShoppingCartDto createNewShoppingCartDto(User user) {
+        return shoppingCartMapper.toDto(createNewShoppingCart(user));
+    }
+
+    private ShoppingCart createNewShoppingCart(User user) {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUser(user);
-        return shoppingCartMapper.toDto(shoppingCartRepository.save(shoppingCart));
+        return shoppingCartRepository.save(shoppingCart);
     }
 }

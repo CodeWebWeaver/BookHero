@@ -63,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderDto> getAll(Pageable pageable, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
-        List<Order> orders = orderRepository.findAllByUser(currentUser);
+        List<Order> orders = orderRepository.findAllByUserWithItems(currentUser);
         List<OrderItem> orderItems = getUserOrderItems(currentUser, orders);
         return orderItemsToOrderDtos(orders, orderItems);
     }
@@ -82,12 +82,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId) {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
-        Long currentUserId = userService.getAuthenticatedUserId();
-        List<OrderItem> orderItems = orderItemsRepository.findByOrder(order, currentUserId);
-        return orderItemsToOrderItemsDto(orderItems);
+        return orderItemsToOrderItemsDto(order.getOrderItems().stream()
+                .toList());
     }
 
     @Override
@@ -127,7 +126,7 @@ public class OrderServiceImpl implements OrderService {
 
     private Set<OrderItem> getOrderItemsFromShoppingCart() {
         ShoppingCart shoppingCart = shoppingCartService.getShoppingCart();
-        Set<CartItem> cartItems = shoppingCartService.getCartItemsSetForShoppingCart(shoppingCart);
+        Set<CartItem> cartItems = shoppingCart.getCartItems();
         if (cartItems.isEmpty()) {
             throw new EmptyShoppingCartException(
                     "Empty shopping cart during processing order. "
@@ -135,7 +134,7 @@ public class OrderServiceImpl implements OrderService {
         }
         shoppingCartService.clearShoppingCart();
         return cartItems.stream()
-                .map(orderItemsMapper::toModel)
+                .map(orderItemsMapper::CartItemtoOrderItem)
                 .collect(Collectors.toSet());
     }
 
