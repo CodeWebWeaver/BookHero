@@ -48,7 +48,6 @@ public class OrderServiceImpl implements OrderService {
         List<OrderItemDto> orderItemDtos = orderItems.stream()
                 .map(orderItemsMapper::toDto)
                 .collect(Collectors.toList());
-        order.setOrderItems(null);
         orderItems.forEach(orderItem -> orderItem.setOrder(order));
         OrderDto orderDto = buildOrderDto(order, orderItemDtos);
         orderItemsRepository.saveAll(orderItems);
