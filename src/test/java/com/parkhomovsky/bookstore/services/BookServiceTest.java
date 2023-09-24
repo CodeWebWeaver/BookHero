@@ -2,9 +2,12 @@ package com.parkhomovsky.bookstore.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.parkhomovsky.bookstore.dto.book.BookDto;
+import com.parkhomovsky.bookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.parkhomovsky.bookstore.dto.book.CreateBookRequestDto;
 import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
 import com.parkhomovsky.bookstore.mapper.BookMapper;
@@ -83,6 +86,17 @@ class BookServiceTest {
             .setDescription("Test book description")
             .setCoverImage("URL")
             .setCategoryIds(Set.of(1L));
+    private static final BookDtoWithoutCategoryIds
+            RESPONSE_EXIST_TEST_BOOK_DTO_WITHOUT_CATEGORIES = new BookDtoWithoutCategoryIds()
+            .setId(1L)
+            .setTitle("Test Book")
+            .setAuthor("Test Author")
+            .setIsbn("1315616")
+            .setPrice(new BigDecimal("14.56"))
+            .setDescription("Test book description")
+            .setCoverImage("URL");
+    private static final List<BookDtoWithoutCategoryIds> ALL_FICTION_BOOKS_DTO
+            = List.of(RESPONSE_EXIST_TEST_BOOK_DTO_WITHOUT_CATEGORIES);
     private static final Long ABSENT_BOOK_ID = 128L;
 
     private static final List<BookDto> ALL_BOOKS_DTO_RESPONSE =
@@ -105,7 +119,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("Verify successful creating book with a valid input")
-    public void create_withValidParameters_shouldReturnBookDto() {
+    public void create_validBookParameters_shouldReturnBookDto() {
         when(bookMapper.toEntity(REQUEST_CREATE_DOTA_BOOK_DTO)).thenReturn(CREATED_DOTA_BOOK);
         when(bookRepository.save(CREATED_DOTA_BOOK)).thenReturn(CREATED_DOTA_BOOK);
         when(bookMapper.toDto(CREATED_DOTA_BOOK)).thenReturn(RESPONSE_CREATED_DOTA_BOOK_DTO);
@@ -116,7 +130,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("Verify returned book with a valid input id")
-    public void findById_withValidBookId_shouldReturnBookDto() {
+    public void findById_validBookId_shouldReturnBookDto() {
         when(bookMapper.toDto(EXIST_TEST_BOOK))
                 .thenReturn(RESPONSE_EXIST_TEST_BOOK_DTO);
         when(bookRepository.findById(EXIST_TEST_BOOK.getId()))
@@ -127,7 +141,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("Verify returned book with a wrong input id")
-    public void findById_withInvalidBookId_shouldThrowEntityNotFoundException() {
+    public void findById_validBookId_shouldThrowEntityNotFoundException() {
         when(bookRepository.findById(ABSENT_BOOK_ID)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(
@@ -143,7 +157,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("Verify all returned books with creating another one")
-    public void getAll_withValidBookParams_shouldReturnListBookDto() {
+    public void getAll_validBookParams_shouldReturnListBookDto() {
         when(bookMapper.toEntity(REQUEST_CREATE_DOTA_BOOK_DTO)).thenReturn(CREATED_DOTA_BOOK);
         when(bookRepository.save(CREATED_DOTA_BOOK)).thenReturn(CREATED_DOTA_BOOK);
         when(bookMapper.toDto(CREATED_DOTA_BOOK)).thenReturn(RESPONSE_CREATED_DOTA_BOOK_DTO);
@@ -154,6 +168,39 @@ class BookServiceTest {
                 ALL_BOOKS, pageable, ALL_BOOKS.size()));
         List<BookDto> actual = bookService.getAll(pageable);
         assertEquals(ALL_BOOKS_DTO_RESPONSE, actual);
+    }
+
+    @Test
+    @DisplayName("Verify all returned books with creating another one")
+    public void getBooksByCategory_validBookCategoryId_shouldReturnBooksDtoWithoutCategoryIds() {
+        when(bookMapper.toDtoWithoutCategories(EXIST_TEST_BOOK))
+                .thenReturn(RESPONSE_EXIST_TEST_BOOK_DTO_WITHOUT_CATEGORIES);
+        when(bookRepository.findAllByCategoryId(FICTION_CATEGORY
+                .getId())).thenReturn(List.of(EXIST_TEST_BOOK));
+        List<BookDtoWithoutCategoryIds> actual =
+                bookService.getAllBooksByCategory(FICTION_CATEGORY.getId());
+        assertEquals(ALL_FICTION_BOOKS_DTO, actual);
+    }
+
+    @Test
+    @DisplayName("Trying to find book after it deleting")
+    public void deleteById_validBookId_shouldDeleteBookFromDbAndThrowExOnAccess() {
+        when(bookRepository.findById(EXIST_TEST_BOOK.getId()))
+                .thenReturn(Optional.empty());
+        doNothing()
+                .when(bookRepository).deleteById(EXIST_TEST_BOOK.getId());
+        bookService.deleteById(EXIST_TEST_BOOK.getId());
+        verify(bookRepository).deleteById(EXIST_TEST_BOOK.getId());
+
+        Exception exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> bookService.getById(EXIST_TEST_BOOK.getId())
+        );
+        String actualMessage = exception.getMessage();
+        String expectedMessage = "Can`t find any book with id: "
+                + EXIST_TEST_BOOK.getId()
+                + " during getById";
+        assertEquals(expectedMessage, actualMessage);
     }
 
 }
