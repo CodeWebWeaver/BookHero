@@ -6,11 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Set;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.ISBN;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 
 @Data
+@Accessors(chain = true)
 public class CreateBookRequestDto {
     @NotBlank(message = "Title cannot be empty")
     @Length(min = 2, max = 255, message = "Title must be between 2 and 255 characters")

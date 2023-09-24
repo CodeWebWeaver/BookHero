@@ -29,3 +29,5 @@ databaseChangeLog:
       file: db/changelog/changes/14-create-orders-table.yaml
   - include:
       file: db/changelog/changes/15-connect-order-and-order-items-tables.yaml
+  - include:
+      file: db/changelog/changes/16-insert-data-in-categories-table.yml
