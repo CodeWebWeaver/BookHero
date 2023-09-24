@@ -171,7 +171,7 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("Verify all returned books with creating another one")
+    @DisplayName("Verify all returned books by specific category id")
     public void getBooksByCategory_validBookCategoryId_shouldReturnBooksDtoWithoutCategoryIds() {
         when(bookMapper.toDtoWithoutCategories(EXIST_TEST_BOOK))
                 .thenReturn(RESPONSE_EXIST_TEST_BOOK_DTO_WITHOUT_CATEGORIES);
