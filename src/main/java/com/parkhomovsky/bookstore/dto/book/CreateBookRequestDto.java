@@ -2,6 +2,7 @@ package com.parkhomovsky.bookstore.dto.book;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Set;
 import lombok.Data;
@@ -20,13 +21,13 @@ public class CreateBookRequestDto {
     @NotBlank(message = "ISBN cannot be empty")
     @ISBN(message = "Invalid ISBN format")
     private String isbn;
-    @NotBlank(message = "Price cannot be empty")
+    @NotNull(message = "Price cannot be empty")
     @DecimalMin(value = "0.00", message = "Price must be greater than or equal to 0.00")
     private BigDecimal price;
     @Length(max = 1000, message = "Description must be less than or equal to 1000 characters")
     private String description;
     @URL(message = "Invalid URL format")
     private String coverImage;
-    @NotBlank(message = "At least one category id needed")
+    @NotNull(message = "At least one category id needed")
     private Set<Long> categoryId;
 }
