@@ -1,4 +1,4 @@
 DELETE
-FROM books
+FROM books;
 DELETE
 FROM books_categories;
