@@ -9,5 +9,6 @@ import org.springframework.http.HttpStatus;
 public class ErrorResponseListDto {
     private LocalDateTime timestamp;
     private HttpStatus status;
-    private List<String> error;
+    private String error;
+    private List<String> validationErrors;
 }

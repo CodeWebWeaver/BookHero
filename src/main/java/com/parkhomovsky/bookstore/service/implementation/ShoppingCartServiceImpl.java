@@ -11,12 +11,12 @@ import com.parkhomovsky.bookstore.repository.cart.ShoppingCartRepository;
 import com.parkhomovsky.bookstore.repository.item.CartItemRepository;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
 import com.parkhomovsky.bookstore.service.UserService;
-import jakarta.transaction.Transactional;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +29,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto getUserShoppingCartDto() throws EntityNotFoundException {
-        User user = (User) userService.getAuthenticatedUser();
+        User user = (User) userService.getAuthenticatedUserDetails();
         Optional<ShoppingCart> shoppingCartOptional =
                 shoppingCartRepository.findByUserId(user.getId());
         return shoppingCartOptional
@@ -45,7 +45,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCart getShoppingCart() {
-        User user = (User) userService.getAuthenticatedUser();
+        User user = (User) userService.getAuthenticatedUserDetails();
         Optional<ShoppingCart> shoppingCartOptional =
                 shoppingCartRepository.findByUserId(user.getId());
         return shoppingCartOptional.orElseGet(() -> createNewShoppingCart(user));

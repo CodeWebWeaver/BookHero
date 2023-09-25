@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 @Service
@@ -30,20 +31,20 @@ public class CartItemServiceImpl implements CartItemService {
     private final BookService bookService;
 
     @Override
+    @Transactional
     public CartItemDto add(Long cartItemId, AddCartItemRequestDto addCartItemRequestDto) {
         Optional<CartItem> possibleCartItem = getCartItemById(cartItemId);
-        if (possibleCartItem.isPresent()) {
-            CartItem cartItem = possibleCartItem.get();
-            CartItem updatedCartItem = addQuantityToCartItem(cartItem,
-                    addCartItemRequestDto.getQuantity());
-            cartItemRepository.save(updatedCartItem);
-            return cartItemMapper.toDto(updatedCartItem);
-        }
-        throw new EntityNotFoundException("No item found with provided cartItemId: "
-                + cartItemId);
+        CartItem cartItem = possibleCartItem.orElseThrow(() ->
+                new EntityNotFoundException("No item found with provided cartItemId: "
+                + cartItemId));
+        CartItem updatedCartItem = addQuantityToCartItem(cartItem,
+                addCartItemRequestDto.getQuantity());
+        cartItemRepository.save(updatedCartItem);
+        return cartItemMapper.toDto(updatedCartItem);
     }
 
     @Override
+    @Transactional
     public CartItemDto create(CreateCartItemRequestDto cartItemDto) {
         Optional<CartItem> possibleCartItem = getCartItemByBookId(cartItemDto.getBookId());
         if (possibleCartItem.isPresent()) {
@@ -58,15 +59,13 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    @Transactional
     public CartItemDto delete(Long cartItemId) {
         ShoppingCart shoppingCart = shoppingCartService.getShoppingCart();
         Set<CartItem> cartItems = getCartItemsListForShoppingCart(shoppingCart);
         Optional<CartItem> possibleCartItem = findCartItemById(cartItems, cartItemId);
-        if (possibleCartItem.isEmpty()) {
-            throw new EntityNotFoundException(
-                    "Cart item with provided id not found. id:" + cartItemId);
-        }
-        CartItem deleteCartItem = possibleCartItem.get();
+        CartItem deleteCartItem = possibleCartItem.orElseThrow(() -> new EntityNotFoundException(
+                "Cart item with provided id not found. id:" + cartItemId));
         cartItemRepository.delete(deleteCartItem);
         return cartItemMapper.toDto(deleteCartItem);
     }
