@@ -68,11 +68,11 @@ public class BookRepositoryTest {
     @Sql(
             scripts = {
                     "classpath:db-scripts/books/add-books-to-books-table.sql",
-                    "classpath:db-scripts/books/books-categories-connection.sql"
+                    "classpath:db-scripts/books_categories/books-categories-connection.sql"
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = "classpath:db-scripts/books/clear-books_connections-tables.sql",
+            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     public void getBooksByCategory_validBookCategoryId_shouldReturnBooksDtoWithoutCategoryIds() {
