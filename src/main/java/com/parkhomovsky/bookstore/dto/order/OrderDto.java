@@ -1,7 +1,7 @@
 package com.parkhomovsky.bookstore.dto.order;
 
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
-import com.parkhomovsky.bookstore.enums.Status;
+import com.parkhomovsky.bookstore.enums.OrderStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,5 +16,5 @@ public class OrderDto {
     private List<OrderItemDto> orderItems;
     private LocalDateTime orderDate;
     private BigDecimal total;
-    private Status status;
+    private OrderStatus orderStatus;
 }

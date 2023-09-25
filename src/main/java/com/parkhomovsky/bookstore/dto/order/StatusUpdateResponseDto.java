@@ -1,6 +1,6 @@
 package com.parkhomovsky.bookstore.dto.order;
 
-import com.parkhomovsky.bookstore.enums.Status;
+import com.parkhomovsky.bookstore.enums.OrderStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -13,5 +13,5 @@ public class StatusUpdateResponseDto {
     private Long userId;
     private LocalDateTime orderDate;
     private BigDecimal total;
-    private Status status;
+    private OrderStatus orderStatus;
 }

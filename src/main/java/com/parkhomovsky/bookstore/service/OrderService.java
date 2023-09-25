@@ -7,20 +7,16 @@ import com.parkhomovsky.bookstore.dto.order.StatusUpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 
 public interface OrderService {
-    OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto,
-                     Authentication authentication);
+    OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto);
 
     StatusUpdateResponseDto updateStatus(Long orderId,
                                          OrderUpdateStatusRequest updateStatusRequest);
 
-    List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId,
-                                        Authentication authentication);
+    List<OrderItemDto> getOrderItems(Pageable pageable, Long orderId);
 
-    OrderItemDto getOrderItemByidDto(Long orderId, Long itemId,
-                                     Authentication authentication);
+    OrderItemDto getOrderItemByid(Long orderId, Long itemId);
 
-    List<OrderDto> getAll(Pageable pageable, Authentication authentication);
+    List<OrderDto> getAll(Pageable pageable);
 }

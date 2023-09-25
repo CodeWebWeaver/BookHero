@@ -14,7 +14,7 @@ import org.hibernate.validator.constraints.URL;
 @Data
 @Accessors(chain = true)
 public class CreateBookRequestDto {
-    @NotBlank(message = "Title cannot be empty")
+    @NotNull(message = "Title cannot be absent")
     @Length(min = 2, max = 255, message = "Title must be between 2 and 255 characters")
     private String title;
     @NotBlank(message = "Author cannot be empty")
