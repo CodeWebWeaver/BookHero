@@ -24,7 +24,10 @@ public class BookRepositoryTest {
             .setName("Comedy");
     private static final Category FICTION_CATEGORY = new Category()
             .setId(1L)
-            .setName("Fiction");
+            .setName("Fiction")
+            .setDescription("Fiction refers to literature created from the imagination."
+                    + " Mysteries, science fiction, romance, fantasy, chick lit, "
+                    + " crime thrillers are all fiction genres.");
     private static final Book CREATED_DOTA_BOOK = new Book()
             .setId(2L)
             .setTitle("Dota 2: Pain and Casino")
@@ -34,36 +37,52 @@ public class BookRepositoryTest {
             .setDescription("Book about why you shoudn`t play Dota 2."
                     + " And why you can`t still find a girl.")
             .setCoverImage("resources/bookImages/Dota-Pain.png")
+            .setDeleted(false)
             .setCategories(Set.of(COMEDY_CATEGORY));
     private static final Book EXIST_TEST_BOOK = new Book()
+            .setId(1L)
             .setTitle("Test Book")
             .setAuthor("Test Author")
             .setIsbn("1315616")
-            .setPrice(new BigDecimal("14.56"))
+            .setPrice(new BigDecimal("15"))
             .setDescription("Test book description")
             .setCoverImage("URL")
             .setCategories(Set.of(FICTION_CATEGORY));
-    private static final Long ABSENT_BOOK_ID = 128L;
-    private static final List<Book> ALL_BOOKS = List.of(EXIST_TEST_BOOK, CREATED_DOTA_BOOK);
-    private static final Long EXPECTED_FICTION_BOOK_COUNT = 1L;
+    private static final Book KOBZAR_BOOK = new Book()
+            .setId(2L)
+            .setTitle("Kobzar")
+            .setAuthor("Shevchenko")
+            .setIsbn("123456789-123")
+            .setPrice(new BigDecimal("15"))
+            .setDescription("Good UA book")
+            .setCoverImage("URL")
+            .setCategories(Set.of(FICTION_CATEGORY));
+    private static final List<Book> ALL_BOOKS = List.of(EXIST_TEST_BOOK, KOBZAR_BOOK);
+    private static final Long EXPECTED_FICTION_BOOK_COUNT = 2L;
 
     @Autowired
     private BookRepository bookRepository;
 
     @Test
-    @DisplayName("Verify all returned books with creating another one")
-    @Sql(scripts = {
-            "classpath:database/books/add-kobzar-book-to-books-table.sql" },
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = {
-            "classpath:database/books/remove-kobzar-book-from-books-table.sql"},
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @DisplayName("Verify all returned books with creating others")
+    @Sql(
+            scripts = {
+                    "classpath:db-scripts/books/add-books-to-books-table.sql",
+                    "classpath:db-scripts/books/books-categories-connection.sql"
+            }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(
+            scripts = "classpath:db-scripts/books/clear-books_connections-tables.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
     public void getBooksByCategory_validBookCategoryId_shouldReturnBooksDtoWithoutCategoryIds() {
         List<Book> actual = bookRepository.findAllByCategoryId(FICTION_CATEGORY.getId());
         assertEquals(EXPECTED_FICTION_BOOK_COUNT, actual.size());
         assertEquals(ALL_BOOKS, actual);
-        boolean isRequestedCategory = actual.stream()
-                .allMatch(book -> book.getCategories().contains(FICTION_CATEGORY));
-        assertTrue(isRequestedCategory);
+        boolean allBooksHaveCategory = actual.stream()
+                .allMatch(book -> book.getCategories()
+                        .stream()
+                        .anyMatch(category -> category.getId() == FICTION_CATEGORY.getId()));
+        assertTrue(allBooksHaveCategory);
     }
 }
