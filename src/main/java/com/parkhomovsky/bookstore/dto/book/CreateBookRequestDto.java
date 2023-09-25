@@ -2,6 +2,7 @@ package com.parkhomovsky.bookstore.dto.book;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Set;
 import lombok.Data;
@@ -11,7 +12,7 @@ import org.hibernate.validator.constraints.URL;
 
 @Data
 public class CreateBookRequestDto {
-    @NotBlank(message = "Title cannot be empty")
+    @NotNull(message = "Title cannot be absent")
     @Length(min = 2, max = 255, message = "Title must be between 2 and 255 characters")
     private String title;
     @NotBlank(message = "Author cannot be empty")

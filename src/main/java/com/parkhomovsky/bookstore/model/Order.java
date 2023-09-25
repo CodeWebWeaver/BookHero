@@ -1,6 +1,6 @@
 package com.parkhomovsky.bookstore.model;
 
-import com.parkhomovsky.bookstore.enums.Status;
+import com.parkhomovsky.bookstore.enums.OrderStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -33,7 +33,7 @@ public class Order {
     private User user;
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status;
+    private OrderStatus orderStatus;
     @Column(name = "total", nullable = false)
     private BigDecimal total;
     @Column(name = "order_date", nullable = false)

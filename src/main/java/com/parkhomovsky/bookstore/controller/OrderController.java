@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,16 +35,15 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Place new order",
             description = "Create a new order and add it to the database")
-    public OrderDto placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto,
-                               Authentication authentication) {
-        return orderService.process(orderPlaceRequestDto, authentication);
+    public OrderDto placeOrder(@RequestBody OrderPlaceRequestDto orderPlaceRequestDto) {
+        return orderService.process(orderPlaceRequestDto);
     }
 
     @GetMapping
     @Operation(summary = "Get all orders",
             description = "Retrieve all orders history")
-    public List<OrderDto> getAll(Pageable pageable, Authentication authentication) {
-        return orderService.getAll(pageable, authentication);
+    public List<OrderDto> getAll(Pageable pageable) {
+        return orderService.getAll(pageable);
     }
 
     @PatchMapping("/{id}")
@@ -61,17 +59,15 @@ public class OrderController {
     @GetMapping("/{orderId}/items")
     @Operation(summary = "Get all orders by orderId",
             description = "Retrieve all orders for a specific order")
-    public List<OrderItemDto> getAllFromOrder(@PathVariable Long orderId, Pageable pageable,
-                                              Authentication authentication) {
-        return orderService.getOrderItemsDto(pageable, orderId, authentication);
+    public List<OrderItemDto> getAllFromOrder(@PathVariable Long orderId, Pageable pageable) {
+        return orderService.getOrderItems(pageable, orderId);
     }
 
     @GetMapping("/{orderId}/items/{itemId}")
     @Operation(summary = "Get item by orderId and itemId",
             description = "Retrieve a specific OrderItem within an order")
     public OrderItemDto getItemFromOrder(@PathVariable Long orderId,
-                                             @PathVariable Long itemId,
-                                         Authentication authentication) {
-        return orderService.getOrderItemByidDto(orderId, itemId, authentication);
+                                             @PathVariable Long itemId) {
+        return orderService.getOrderItemByid(orderId, itemId);
     }
 }
