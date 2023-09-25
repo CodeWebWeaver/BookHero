@@ -5,7 +5,7 @@ import com.parkhomovsky.bookstore.dto.order.OrderPlaceRequestDto;
 import com.parkhomovsky.bookstore.dto.order.OrderUpdateStatusRequest;
 import com.parkhomovsky.bookstore.dto.order.StatusUpdateResponseDto;
 import com.parkhomovsky.bookstore.dto.orderitem.OrderItemDto;
-import com.parkhomovsky.bookstore.enums.Status;
+import com.parkhomovsky.bookstore.enums.OrderStatus;
 import com.parkhomovsky.bookstore.exception.EmptyShoppingCartException;
 import com.parkhomovsky.bookstore.exception.EntityNotFoundException;
 import com.parkhomovsky.bookstore.mapper.OrderItemsMapper;
@@ -19,6 +19,7 @@ import com.parkhomovsky.bookstore.repository.order.OrderRepository;
 import com.parkhomovsky.bookstore.repository.orderitems.OrderItemsRepository;
 import com.parkhomovsky.bookstore.service.OrderService;
 import com.parkhomovsky.bookstore.service.ShoppingCartService;
+import com.parkhomovsky.bookstore.service.UserService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,8 +28,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,12 +39,13 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemsRepository orderItemsRepository;
     private final OrderMapper orderMapper;
     private final OrderItemsMapper orderItemsMapper;
+    private final UserService userService;
 
-    public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto,
-                            Authentication authentication) {
+    public OrderDto process(OrderPlaceRequestDto orderPlaceRequestDto) {
         Set<OrderItem> orderItems = getOrderItemsFromShoppingCart();
+        User authenticatedUser = userService.getAuthenticatedUser();
         Order order = buildOrder(orderPlaceRequestDto.getShippingAddress(),
-                orderItems, authentication);
+                orderItems, authenticatedUser);
         orderRepository.save(order);
         List<OrderItemDto> orderItemDtos = orderItems.stream()
                 .map(orderItemsMapper::toDto)
@@ -55,29 +57,29 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDto> getAll(Pageable pageable, Authentication authentication) {
-        User currentUser = (User) authentication.getPrincipal();
-        List<Order> orders = orderRepository.findAllByUserWithItems(currentUser);
+    public List<OrderDto> getAll(Pageable pageable) {
+        User authenticatedUser = userService.getAuthenticatedUser();
+        List<Order> orders = orderRepository.findAllByUserWithItems(authenticatedUser);
         return orderItemsToOrderDtos(orders);
     }
 
     @Override
+    @Transactional
     public StatusUpdateResponseDto updateStatus(Long orderId,
                                                 OrderUpdateStatusRequest updateStatusRequest) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
-        Status newStatus = updateStatusRequest.getStatus();
-        order.setStatus(newStatus);
+        OrderStatus newOrderStatus = updateStatusRequest.getOrderStatus();
+        order.setOrderStatus(newOrderStatus);
         order = orderRepository.save(order);
         return orderMapper.toUpdateResponse(order);
     }
 
     @Override
-    public List<OrderItemDto> getOrderItemsDto(Pageable pageable, Long orderId,
-                                               Authentication authentication) {
-        User currentUser = ((User) authentication.getPrincipal());
-        Order order = orderRepository.findByUserAndIdWithItems(orderId, currentUser)
+    public List<OrderItemDto> getOrderItems(Pageable pageable, Long orderId) {
+        User authenticatedUser = userService.getAuthenticatedUser();
+        Order order = orderRepository.findByUserAndIdWithItems(orderId, authenticatedUser)
                 .orElseThrow(() -> new EntityNotFoundException("Order with id "
                         + orderId + " not found"));
         return orderItemsToOrderItemsDto(order.getOrderItems().stream()
@@ -85,11 +87,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderItemDto getOrderItemByidDto(Long orderId, Long itemId,
-                                            Authentication authentication) {
-        User currentUser = ((User) authentication.getPrincipal());
+    public OrderItemDto getOrderItemByid(Long orderId, Long itemId) {
+        User authenticatedUser = userService.getAuthenticatedUser();
         Optional<OrderItem> orderItem =
-                orderItemsRepository.findByIdAndOrderIdAndUser(itemId, orderId, currentUser);
+                orderItemsRepository.findByIdAndOrderIdAndUser(itemId, orderId, authenticatedUser);
         return orderItemsMapper.toDto(orderItem.orElseThrow(() ->
                 new EntityNotFoundException("Order item with id "
                         + itemId + " not found in order with id " + orderId)));
@@ -120,13 +121,14 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toSet());
     }
 
-    private Order buildOrder(String shippingAddress, Set<OrderItem> orderItems,
-                             Authentication authentication) {
+    private Order buildOrder(String shippingAddress,
+                             Set<OrderItem> orderItems,
+                             User authenticatedUser) {
         Order order = new Order();
         order.setShippingAddress(shippingAddress);
         order.setOrderDate(LocalDateTime.now());
-        order.setStatus(Status.PENDING);
-        order.setUser((User) authentication.getPrincipal());
+        order.setOrderStatus(OrderStatus.PENDING);
+        order.setUser(authenticatedUser);
         order.setTotal(getTotalPrice(orderItems));
         order.setOrderItems(orderItems);
         return order;

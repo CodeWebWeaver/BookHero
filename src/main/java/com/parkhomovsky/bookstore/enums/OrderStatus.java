@@ -1,6 +1,6 @@
 package com.parkhomovsky.bookstore.enums;
 
-public enum Status {
+public enum OrderStatus {
     PENDING,
     DELIVERED,
     COMPLETED
