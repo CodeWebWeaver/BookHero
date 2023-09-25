@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.IntStream;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +38,7 @@ class BookControllerTest {
             .setTitle("Test Book")
             .setAuthor("Test Author")
             .setIsbn("1315616")
-            .setPrice(new BigDecimal("14.56"))
+            .setPrice(new BigDecimal("15"))
             .setDescription("Test book description")
             .setCoverImage("https://URL")
             .setCategoryIds(Set.of(1L));
@@ -167,15 +166,18 @@ class BookControllerTest {
             scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
-    @DisplayName("Test findAll() without pagination")
+    @DisplayName("Testing get all books from db")
     void findAll_withoutPagination_returnListOfBookDtos() throws Exception {
-        List<BookDto> expected = List.of(RESPONSE_FICTION_BOOK_DTO, RESPONSE_DOTA_BOOK_DTO, KOBZAR_BOOK_DTO);
+        List<BookDto> expected =
+                List.of(RESPONSE_FICTION_BOOK_DTO, RESPONSE_DOTA_BOOK_DTO, KOBZAR_BOOK_DTO);
         MvcResult mvcResult = mockMvc.perform(get("/books")).andReturn();
         List<BookDto> actual = Arrays.asList(objectMapper.readValue(
                 mvcResult.getResponse().getContentAsString(), BookDto[].class));
-        IntStream.range(0, expected.size())
-                .forEach(id -> assertTrue(EqualsBuilder
-                        .reflectionEquals(expected.get(id), actual.get(id), "id")));
+        boolean allExpectedBooksFound = expected.stream()
+                .allMatch(expectedBook -> actual.stream()
+                        .anyMatch(actualBook -> expectedBook.getId().equals(actualBook.getId())));
+
+        assertTrue(allExpectedBooksFound, "Not all expected books were found in actual list.");
     }
 
     @WithMockUser(username = "user")

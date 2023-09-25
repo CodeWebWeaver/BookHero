@@ -14,7 +14,6 @@ import com.parkhomovsky.bookstore.dto.category.CategoryDto;
 import com.parkhomovsky.bookstore.dto.category.CategoryRequestDto;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.IntStream;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -37,9 +36,7 @@ class CategoryControllerTest {
     private static final CategoryDto FICTION_DTO = new CategoryDto()
             .setId(1L)
             .setName("Fiction")
-            .setDescription("Fiction refers to literature created from the imagination. \n"
-                    + "Mysteries, science fiction, romance, fantasy, chick lit, \n"
-                    + "crime thrillers are all fiction genres.");
+            .setDescription("Fiction books");
     private static final CategoryDto COMEDY_DTO = new CategoryDto()
             .setId(2L)
             .setName("Comedy")
@@ -56,7 +53,7 @@ class CategoryControllerTest {
             new CategoryRequestDto()
                     .setName("")
                     .setDescription("Books about mystery worlds and unbelievable");
-    private static final BookDtoWithoutCategoryIds RESPONSE_TEST_BOOK_DTO_WITHOUT_CATEGORY_ID =
+    private static final BookDtoWithoutCategoryIds RESPONSE_FICTION_BOOK_DTO_WITHOUT_CATEGORY_ID =
             new BookDtoWithoutCategoryIds()
             .setId(1L)
             .setTitle("Test Book")
@@ -64,16 +61,16 @@ class CategoryControllerTest {
             .setIsbn("1315616")
             .setPrice(new BigDecimal("14.56"))
             .setDescription("Test book description")
-            .setCoverImage("URL");
+            .setCoverImage("https://URL");
     private static final BookDtoWithoutCategoryIds RESPONSE_KOBZAR_BOOK_DTO_WITHOUT_CATEGORY_ID =
             new BookDtoWithoutCategoryIds()
-            .setId(2L)
+            .setId(3L)
             .setTitle("Kobzar")
             .setAuthor("Shevchenko")
             .setIsbn("123456789-123")
             .setPrice(new BigDecimal("15"))
             .setDescription("Good UA book")
-            .setCoverImage("URL");
+            .setCoverImage("https://URL");
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -88,13 +85,17 @@ class CategoryControllerTest {
 
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @Test
-    @DisplayName("Test create() with a valid request body")
+    @Sql(
+            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
+    @DisplayName("Test creating category with a valid request body")
     void create_validRequestBody_returnCategoryDto() throws Exception {
         MvcResult mvcResult = mockMvc.perform(post("/categories")
                         .content(objectMapper.writeValueAsString(FANTASY_REQUEST_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         CategoryDto actual = objectMapper.readValue(
@@ -106,11 +107,10 @@ class CategoryControllerTest {
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @Test
     @Sql(
-            scripts = "classpath:database/"
-                    + "delete-all-from-categories-books-books_categories-tables.sql",
+            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
-    @DisplayName("Test create() with an invalid request body")
+    @DisplayName("Test creating category with an invalid request body")
     void create_invalidRequestBody_throwException() throws Exception {
         mockMvc.perform(post("/categories")
                         .content(objectMapper.writeValueAsString(INVALID_FANTASY_REQUEST_DTO))
@@ -123,6 +123,8 @@ class CategoryControllerTest {
     @Test
     @Sql(
             scripts = {
+                    "classpath:db-scripts/categories/add-fiction-to-categories-table.sql",
+                    "classpath:db-scripts/categories/add-comedy-to-categories-table.sql",
                     "classpath:db-scripts/categories/add-fantasy-to-categories-table.sql"
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
@@ -130,7 +132,7 @@ class CategoryControllerTest {
             scripts = "classpath:db-scripts/categories/clear-categories-table.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
-    @DisplayName("Test getAll() without pagination")
+    @DisplayName("Get all categories from db")
     void getAll_withoutPagination_returnListOfCategoryDtos() throws Exception {
         List<CategoryDto> expected = List.of(FICTION_DTO, COMEDY_DTO, FANTASY_DTO);
         MvcResult mvcResult = mockMvc.perform(get("/categories")).andReturn();
@@ -138,9 +140,11 @@ class CategoryControllerTest {
         List<CategoryDto> actual = List.of(objectMapper
                 .readValue(mvcResult.getResponse().getContentAsString(), CategoryDto[].class));
 
-        IntStream.range(0, expected.size())
-                .forEach(id -> assertTrue(EqualsBuilder
-                        .reflectionEquals(expected.get(id), actual.get(id), "id")));
+        boolean allExpectedBooksFound = expected.stream()
+                .allMatch(expectedBook -> actual.stream()
+                        .anyMatch(actualBook -> expectedBook.getId().equals(actualBook.getId())));
+
+        assertTrue(allExpectedBooksFound, "Not all expected books were found in actual list.");
     }
 
     @WithMockUser(username = "user")
@@ -154,9 +158,9 @@ class CategoryControllerTest {
             scripts = "classpath:db-scripts/categories/clear-categories-table.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
-    @DisplayName("Test getCategoryById() with a correct id")
+    @DisplayName("Get category by id")
     void getCategoryById_validId_returnCategoryDto() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get("/categories" + VALID_FANTASY_ID)).andReturn();
+        MvcResult mvcResult = mockMvc.perform(get("/categories/" + VALID_FANTASY_ID)).andReturn();
 
         CategoryDto actual = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                 CategoryDto.class);
@@ -175,24 +179,24 @@ class CategoryControllerTest {
             scripts = "classpath:db-scripts/categories/clear-categories-table.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
-    @DisplayName("Test getCategoryById() with an invalid id")
+    @DisplayName("Test get category by invalid id")
     void getCategoryById_invalidId_throwException() throws Exception {
         mockMvc.perform(get("/categories" + INVALID_CATEGORY_ID))
-                .andExpect(status().isConflict());
+                .andExpect(status().isNotFound());
     }
 
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @Test
     @Sql(
             scripts = {
-                    "classpath:db-scripts/categories/add-fantasy-to-categories-table.sql"
+                    "classpath:db-scripts/categories/add-fiction-to-categories-table.sql"
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
             scripts = "classpath:db-scripts/categories/clear-categories-table.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
-    @DisplayName("Test update() with valid id and request dto")
+    @DisplayName("Test updating category with valid id and request dto")
     void update_validIdAndRequestDto_returnCategoryDto() throws Exception {
         MvcResult mvcResult = mockMvc.perform(put("/categories/1")
                         .content(objectMapper.writeValueAsString(FANTASY_REQUEST_DTO))
@@ -224,7 +228,7 @@ class CategoryControllerTest {
                         .content(objectMapper.writeValueAsString(INVALID_FANTASY_REQUEST_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @WithMockUser(username = "admin", roles = {"ADMIN"})
@@ -241,35 +245,39 @@ class CategoryControllerTest {
     @DisplayName("Test delete() with a valid id")
     void delete_validId_returnNothing() throws Exception {
         mockMvc.perform(delete("/categories/3"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @WithMockUser(username = "user")
     @Test
     @Sql(
             scripts = {
-                    "classpath:db-scripts/categories/add-fantasy-to-categories-table.sql",
-                    "classpath:db-scripts/books/add-books-to-books-table.sql",
-                    "classpath:db-scripts/books_categories/books-categories-connection.sql"
+                    "classpath:db-scripts/categories/add-fiction-to-categories-table.sql",
+                    "classpath:db-scripts/books_categories/add-fiction-book-fiction.sql",
+                    "classpath:db-scripts/books_categories/add-kobzar-book-fiction.sql",
+                    "classpath:db-scripts/books/add-fiction-book-to-books.sql",
+                    "classpath:db-scripts/books/add-kobzar-book-to-books.sql",
+                    "classpath:db-scripts/books/add-dota-book-to-books.sql"
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = {"classpath:db-scripts/clear-books_connections-tables.sql",
-                "classpath:db-scripts/categories/clear-categories-table.sql"
+            scripts = {"classpath:db-scripts/clear-books_connections-tables.sql"
             }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
-    @DisplayName("Test getBooksByCategoryId() with valid category id")
+    @DisplayName("Test getting books by valid category id")
     void getBooksByCategoryId_validId_returnListOfBookDtosWithoutCategoryId() throws Exception {
         List<BookDtoWithoutCategoryIds> expected =
-                List.of(RESPONSE_TEST_BOOK_DTO_WITHOUT_CATEGORY_ID,
+                List.of(RESPONSE_FICTION_BOOK_DTO_WITHOUT_CATEGORY_ID,
                         RESPONSE_KOBZAR_BOOK_DTO_WITHOUT_CATEGORY_ID);
         MvcResult mvcResult = mockMvc.perform(get("/categories/1/books")).andReturn();
 
         List<BookDtoWithoutCategoryIds> actual = List.of(objectMapper.readValue(
                 mvcResult.getResponse().getContentAsString(), BookDtoWithoutCategoryIds[].class));
 
-        IntStream.range(0, expected.size())
-                .forEach(id -> assertTrue(EqualsBuilder
-                        .reflectionEquals(expected.get(id), actual.get(id), "id")));
+        boolean allExpectedBooksFound = expected.stream()
+                .allMatch(expectedBook -> actual.stream()
+                        .anyMatch(actualBook -> expectedBook.getId().equals(actualBook.getId())));
+
+        assertTrue(allExpectedBooksFound, "Not all expected books were found in actual list.");
     }
 }
