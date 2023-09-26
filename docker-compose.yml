@@ -3,7 +3,7 @@ version: "3.0"
 services:
   postgresdb:
     image: postgres
-    container_name: bookstore_container
+    container_name: bookstore_postgres_db
     restart: always
     env_file: ./.env
     environment:

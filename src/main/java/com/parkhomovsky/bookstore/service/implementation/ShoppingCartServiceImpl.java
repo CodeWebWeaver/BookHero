@@ -29,7 +29,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto getUserShoppingCartDto() throws EntityNotFoundException {
-        User user = (User) userService.getAuthenticatedUserDetails();
+        User user = userService.getAuthenticatedUser();
         Optional<ShoppingCart> shoppingCartOptional =
                 shoppingCartRepository.findByUserId(user.getId());
         return shoppingCartOptional
@@ -45,7 +45,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCart getShoppingCart() {
-        User user = (User) userService.getAuthenticatedUserDetails();
+        User user = userService.getAuthenticatedUser();
         Optional<ShoppingCart> shoppingCartOptional =
                 shoppingCartRepository.findByUserId(user.getId());
         return shoppingCartOptional.orElseGet(() -> createNewShoppingCart(user));

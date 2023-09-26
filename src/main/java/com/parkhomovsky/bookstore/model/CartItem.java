@@ -14,9 +14,11 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 @Entity
 @Data
+@Accessors(chain = true)
 @Table(name = "cart_items", uniqueConstraints =
         @UniqueConstraint(columnNames = {"book_id"}))
 public class CartItem {

@@ -31,11 +31,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(
-        initializers = ContextInitializer.class
-)
 class CategoryControllerTest {
     protected static MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
     private static final int VALID_FANTASY_ID = 3;
     private static final int INVALID_CATEGORY_ID = 100;
     private static final CategoryDto FICTION_DTO = new CategoryDto()
@@ -76,9 +75,6 @@ class CategoryControllerTest {
             .setPrice(new BigDecimal("15"))
             .setDescription("Good UA book")
             .setCoverImage("https://URL");
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @BeforeAll
     static void beforeAll(@Autowired WebApplicationContext applicationContext) {
