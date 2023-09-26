@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parkhomovsky.bookstore.config.ContextInitializer;
 import com.parkhomovsky.bookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.parkhomovsky.bookstore.dto.category.CategoryDto;
 import com.parkhomovsky.bookstore.dto.category.CategoryRequestDto;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -29,6 +31,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(
+        initializers = ContextInitializer.class
+)
 class CategoryControllerTest {
     protected static MockMvc mockMvc;
     private static final int VALID_FANTASY_ID = 3;
