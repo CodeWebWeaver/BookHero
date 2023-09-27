@@ -19,26 +19,12 @@ import org.springframework.test.context.jdbc.Sql;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class BookRepositoryTest {
-    private static final Category COMEDY_CATEGORY = new Category()
-            .setId(2L)
-            .setName("Comedy");
     private static final Category FICTION_CATEGORY = new Category()
             .setId(1L)
             .setName("Fiction")
             .setDescription("Fiction refers to literature created from the imagination."
                     + " Mysteries, science fiction, romance, fantasy, chick lit, "
                     + " crime thrillers are all fiction genres.");
-    private static final Book DOTA_BOOK = new Book()
-            .setId(2L)
-            .setTitle("Dota 2: Pain and Casino")
-            .setAuthor("U.N. LoLovich")
-            .setIsbn("978-0-9767736-6-5")
-            .setPrice(new BigDecimal("25"))
-            .setDescription("Book about why you shoudn`t play Dota 2."
-                    + " And why you can`t still find a girl.")
-            .setCoverImage("resources/bookImages/Dota-Pain.png")
-            .setDeleted(false)
-            .setCategories(Set.of(COMEDY_CATEGORY));
     private static final Book FICTION_BOOK = new Book()
             .setId(1L)
             .setTitle("Test Book")
