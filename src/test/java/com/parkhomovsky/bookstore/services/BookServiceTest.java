@@ -133,7 +133,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("Verify returned book with a wrong input id")
-    public void findById_validBookId_shouldThrowEntityNotFoundException() {
+    public void findById_invalidBookId_shouldThrowEntityNotFoundException() {
         when(bookRepository.findById(ABSENT_BOOK_ID)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(

@@ -96,6 +96,26 @@ class BookControllerTest {
                     + " And why you can`t still find a girl.")
             .setCoverImage("resources/bookImages/Dota-Pain.png")
             .setCategoryId(Set.of(2L));
+    private static final String ADD_COMEDY_CATEGORY =
+            "classpath:db-scripts/categories/add-comedy-to-categories-table.sql";
+    private static final String CLEAR_BOOK_CATEGORIES_TABLES =
+            "classpath:db-scripts/clear-books_connections-tables.sql";
+    private static final String ADD_FICTION_CATEGORY =
+            "classpath:db-scripts/categories/add-fiction-to-categories-table.sql";
+    private static final String ADD_FANTASY_CATEGORY =
+            "classpath:db-scripts/categories/add-fantasy-to-categories-table.sql";
+    private static final String ADD_FICTION_BOOK =
+            "classpath:db-scripts/books/add-fiction-book-to-books.sql";
+    private static final String ADD_DOTA_BOOK =
+            "classpath:db-scripts/books/add-dota-book-to-books.sql";
+    private static final String ADD_KOBZAR_BOOK =
+            "classpath:db-scripts/books/add-kobzar-book-to-books.sql";
+    private static final String CONNECT_FICTION_BOOK_AND_FICTION_CATEGORY =
+            "classpath:db-scripts/books_categories/add-fiction-book-fiction.sql";
+    private static final String CONNECT_DOTA_BOOK_AND_COMEDY_CATEGORY =
+            "classpath:db-scripts/books_categories/add-dota-book-comedy.sql";
+    private static final String CONNECT_KOBZAR_BOOK_AND_FICTION_CATEGORY =
+            "classpath:db-scripts/books_categories/add-kobzar-book-fiction.sql";
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -111,11 +131,11 @@ class BookControllerTest {
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @Test
     @Sql(
-            scripts = "classpath:db-scripts/categories/add-comedy-to-categories-table.sql",
+            scripts = ADD_COMEDY_CATEGORY,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
+            scripts = CLEAR_BOOK_CATEGORIES_TABLES,
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Creating book with valid book params. Ok Status and DTO Expected")
@@ -140,7 +160,7 @@ class BookControllerTest {
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
+            scripts = CLEAR_BOOK_CATEGORIES_TABLES,
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Create book with absent book title. Bad Request expected")
@@ -156,19 +176,19 @@ class BookControllerTest {
     @Test
     @Sql(
             scripts = {
-                    "classpath:db-scripts/books/add-fiction-book-to-books.sql",
-                    "classpath:db-scripts/books/add-dota-book-to-books.sql",
-                    "classpath:db-scripts/books/add-kobzar-book-to-books.sql",
-                    "classpath:db-scripts/categories/add-fiction-to-categories-table.sql",
-                    "classpath:db-scripts/categories/add-comedy-to-categories-table.sql",
-                    "classpath:db-scripts/categories/add-fantasy-to-categories-table.sql",
-                    "classpath:db-scripts/books_categories/add-fiction-book-fiction.sql",
-                    "classpath:db-scripts/books_categories/add-dota-book-comedy.sql",
-                    "classpath:db-scripts/books_categories/add-kobzar-book-fiction.sql"
+                    ADD_FICTION_BOOK,
+                    ADD_DOTA_BOOK,
+                    ADD_KOBZAR_BOOK,
+                    ADD_FICTION_CATEGORY,
+                    ADD_COMEDY_CATEGORY,
+                    ADD_FANTASY_CATEGORY,
+                    CONNECT_FICTION_BOOK_AND_FICTION_CATEGORY,
+                    CONNECT_DOTA_BOOK_AND_COMEDY_CATEGORY,
+                    CONNECT_KOBZAR_BOOK_AND_FICTION_CATEGORY
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
+            scripts = CLEAR_BOOK_CATEGORIES_TABLES,
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Testing get all books from db")
@@ -189,13 +209,13 @@ class BookControllerTest {
     @Test
     @Sql(
             scripts = {
-                    "classpath:db-scripts/books/add-fiction-book-to-books.sql",
-                    "classpath:db-scripts/categories/add-fiction-to-categories-table.sql",
-                    "classpath:db-scripts/books_categories/add-fiction-book-fiction.sql"
+                    ADD_FICTION_BOOK,
+                    CONNECT_FICTION_BOOK_AND_FICTION_CATEGORY,
+                    ADD_FICTION_CATEGORY
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
+            scripts = CLEAR_BOOK_CATEGORIES_TABLES,
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test getById with a correct id")
@@ -210,13 +230,13 @@ class BookControllerTest {
     @Test
     @Sql(
             scripts = {
-                    "classpath:db-scripts/books/add-fiction-book-to-books.sql",
-                    "classpath:db-scripts/books_categories/add-fiction-book-fiction.sql",
-                    "classpath:db-scripts/categories/add-fiction-to-categories-table.sql"
+                    ADD_FICTION_BOOK,
+                    CONNECT_FICTION_BOOK_AND_FICTION_CATEGORY,
+                    ADD_FICTION_CATEGORY
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
+            scripts = CLEAR_BOOK_CATEGORIES_TABLES,
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test getById with an invalid id")
@@ -229,13 +249,13 @@ class BookControllerTest {
     @Test
     @Sql(
             scripts = {
-                    "classpath:db-scripts/categories/add-fiction-to-categories-table.sql",
-                    "classpath:db-scripts/books/add-fiction-book-to-books.sql",
-                    "classpath:db-scripts/books_categories/add-fiction-book-fiction.sql"
+                    ADD_FICTION_BOOK,
+                    CONNECT_FICTION_BOOK_AND_FICTION_CATEGORY,
+                    ADD_FICTION_CATEGORY
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(
-            scripts = "classpath:db-scripts/clear-books_connections-tables.sql",
+            scripts = CLEAR_BOOK_CATEGORIES_TABLES,
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test deleteById() with a valid id")
