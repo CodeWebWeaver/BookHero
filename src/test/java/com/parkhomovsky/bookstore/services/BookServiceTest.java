@@ -14,8 +14,6 @@ import com.parkhomovsky.bookstore.mapper.BookMapper;
 import com.parkhomovsky.bookstore.model.Book;
 import com.parkhomovsky.bookstore.model.Category;
 import com.parkhomovsky.bookstore.repository.book.BookRepository;
-import com.parkhomovsky.bookstore.repository.book.BookSpecificationBuilder;
-import com.parkhomovsky.bookstore.repository.category.CategoryRepository;
 import com.parkhomovsky.bookstore.service.implementation.BookServiceImpl;
 import java.math.BigDecimal;
 import java.util.List;
@@ -107,12 +105,6 @@ class BookServiceTest {
 
     @Mock
     private BookMapper bookMapper;
-
-    @Mock
-    private BookSpecificationBuilder bookSpecificationBuilder;
-
-    @Mock
-    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private BookServiceImpl bookService;
