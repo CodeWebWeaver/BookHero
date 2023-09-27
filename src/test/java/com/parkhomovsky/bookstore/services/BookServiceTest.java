@@ -97,20 +97,15 @@ class BookServiceTest {
     private static final List<BookDtoWithoutCategoryIds> ALL_FICTION_BOOKS_DTO
             = List.of(RESPONSE_EXIST_TEST_BOOK_DTO_WITHOUT_CATEGORIES);
     private static final Long ABSENT_BOOK_ID = 128L;
-
     private static final List<BookDto> ALL_BOOKS_DTO_RESPONSE =
             List.of(RESPONSE_EXIST_TEST_BOOK_DTO, RESPONSE_CREATED_DOTA_BOOK_DTO);
     private static final List<Book> ALL_BOOKS = List.of(EXIST_TEST_BOOK, CREATED_DOTA_BOOK);
     @Mock
     private BookRepository bookRepository;
-
     @Mock
     private BookMapper bookMapper;
-
     @Mock
     private CategoryRepository categoryRepository;
-
-
     @InjectMocks
     private BookServiceImpl bookService;
 
