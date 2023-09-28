@@ -21,6 +21,6 @@ public class BookSpecificationProviderManager implements SpecificationProviderMa
                 .orElseThrow(() ->
                         new NoSuchElementException(
                                 "Can`t find correct specification provider for key: "
-                                + key));
+                                        + key));
     }
 }

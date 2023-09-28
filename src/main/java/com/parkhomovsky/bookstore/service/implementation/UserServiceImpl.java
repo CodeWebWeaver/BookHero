@@ -12,6 +12,9 @@ import com.parkhomovsky.bookstore.repository.user.UserRepository;
 import com.parkhomovsky.bookstore.service.UserService;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -34,5 +37,12 @@ public class UserServiceImpl implements UserService {
         user.setRoles(Set.of(role));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         return userMapper.toRegistrationResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserDetails getUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        return (UserDetails) principal;
     }
 }

@@ -4,6 +4,7 @@ import com.parkhomovsky.bookstore.dto.book.BookDto;
 import com.parkhomovsky.bookstore.dto.book.BookDtoWithoutCategoryIds;
 import com.parkhomovsky.bookstore.dto.book.BookSearchParameters;
 import com.parkhomovsky.bookstore.dto.book.CreateBookRequestDto;
+import com.parkhomovsky.bookstore.model.Book;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 
@@ -21,4 +22,6 @@ public interface BookService {
     List<BookDto> getAll(Pageable pageable);
 
     List<BookDtoWithoutCategoryIds> getAllBooksByCategory(Long categoryId);
+
+    Book getBookFromId(Long bookId);
 }
