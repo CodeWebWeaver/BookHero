@@ -101,7 +101,7 @@ public class ShoppingCartRepositoryTest {
             "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql",
             "classpath:db-scripts/cart-items/add-dota-cart-item-to-cart-items.sql",
             "classpath:db-scripts/cart-items/add-fiction-cart-item-to-cart-items.sql",
-            "classpath:db-scripts/users/add-user-to-users.sql"
+            "classpath:db-scripts/users/add-user-to-users-table.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
@@ -124,7 +124,7 @@ public class ShoppingCartRepositoryTest {
             "classpath:db-scripts/books/add-dota-book-to-books.sql",
             "classpath:db-scripts/books/add-fiction-book-to-books.sql",
             "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql",
-            "classpath:db-scripts/users/add-user-to-users.sql"
+            "classpath:db-scripts/users/add-user-to-users-table.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
@@ -144,7 +144,7 @@ public class ShoppingCartRepositoryTest {
 
     @Test
     @Sql(scripts = {
-            "classpath:db-scripts/users/add-user-to-users.sql"
+            "classpath:db-scripts/users/add-user-to-users-table.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
