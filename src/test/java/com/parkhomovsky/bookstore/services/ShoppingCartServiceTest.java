@@ -3,10 +3,8 @@ package com.parkhomovsky.bookstore.services;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parkhomovsky.bookstore.dto.cart.ShoppingCartDto;
 import com.parkhomovsky.bookstore.dto.item.CartItemDto;
 import com.parkhomovsky.bookstore.enums.RoleName;
@@ -28,14 +26,13 @@ import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(MockitoExtension.class)
 public class ShoppingCartServiceTest {
 
     private static final Role ROLE_USER = new Role()
@@ -57,10 +54,6 @@ public class ShoppingCartServiceTest {
             .setId(2L)
             .setName("Comedy")
             .setDescription("Funny books that lead to make laughing of people");
-    private static final Category FANTASY = new Category()
-            .setId(3L)
-            .setName("Fantasy")
-            .setDescription("Books about mystery worlds and unbelievable");
 
     private static final Book FICTION_BOOK = new Book()
             .setId(1L)
@@ -120,11 +113,6 @@ public class ShoppingCartServiceTest {
             .setBookId(2L)
             .setBookTitle("Dota 2: Pain and Casino")
             .setQuantity(1);
-    private static final CartItemDto KOBZAR_CART_ITEM_DTO = new CartItemDto()
-            .setId(3L)
-            .setBookId(3L)
-            .setBookTitle("Kobzar")
-            .setQuantity(2);
 
     private static final ShoppingCartDto SHOPPING_CART_DTO = new ShoppingCartDto()
             .setId(1L)
@@ -141,11 +129,6 @@ public class ShoppingCartServiceTest {
             .setId(1L)
             .setUser(USER)
             .setCartItems(new HashSet<>());
-    protected static MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private static final Long FICTION_BOOK_ID = 1L;
 
     @Mock
     private ShoppingCartRepository shoppingCartRepository;
@@ -159,19 +142,20 @@ public class ShoppingCartServiceTest {
     private UserServiceImpl userService;
     @InjectMocks
     private ShoppingCartServiceImpl shoppingCartServiceImpl;
+
     @BeforeAll
     static void beforeAll() {
         FICTION_CART_ITEM.setShoppingCart(SHOPPING_CART);
         DOTA_CART_ITEM.setShoppingCart(SHOPPING_CART);
         KOBZAR_CART_ITEM.setShoppingCart(SHOPPING_CART);
     }
+
     @WithMockUser(username = "user")
     @Test
     void getUserShoppingCart_existsShoppingCart_shouldReturnShoppingCartDto() {
-        mockgetAuthenticatedUser();
+        when(userService.getAuthenticatedUser()).thenReturn(USER);
         when(cartItemMapper.toDto(FICTION_CART_ITEM)).thenReturn(FICTION_CART_ITEM_DTO);
         when(cartItemMapper.toDto(DOTA_CART_ITEM)).thenReturn(DOTA_CART_ITEM_DTO);
-        when(cartItemMapper.toDto(KOBZAR_CART_ITEM)).thenReturn(KOBZAR_CART_ITEM_DTO);
         when(shoppingCartRepository.findByUserId(any())).thenReturn(
                 Optional.of(SHOPPING_CART));
         when(shoppingCartMapper.toDto(any())).thenReturn(SHOPPING_CART_DTO);
@@ -183,7 +167,7 @@ public class ShoppingCartServiceTest {
     @WithMockUser(username = "user")
     @Test
     void getUserShoppingCart_nonExistsShoppingCart_shouldReturnShoppingCartDto() {
-        mockgetAuthenticatedUser();
+        when(userService.getAuthenticatedUser()).thenReturn(USER);
         when(shoppingCartRepository.findByUserId(any())).thenReturn(
                 Optional.empty());
         when(shoppingCartRepository.save(CREATED_SHOPPING_CART)).thenReturn(SAVED_SHOPPING_CART);
@@ -196,16 +180,12 @@ public class ShoppingCartServiceTest {
     @WithMockUser(username = "user")
     @Test
     void clearShoppingCart_ExistsShoppingCart_ShouldDeleteCartItems() {
-        mockgetAuthenticatedUser();
+        when(userService.getAuthenticatedUser()).thenReturn(USER);
         when(shoppingCartRepository.findByUserId(any())).thenReturn(Optional.of(SHOPPING_CART));
 
         shoppingCartServiceImpl.clearShoppingCart();
 
         assertDoesNotThrow(() ->
                 cartItemRepository.deleteAllByShoppingCartId(SHOPPING_CART.getId()));
-    }
-
-    private void mockgetAuthenticatedUser() {
-        when(userService.getAuthenticatedUser()).thenReturn(USER);
     }
 }
