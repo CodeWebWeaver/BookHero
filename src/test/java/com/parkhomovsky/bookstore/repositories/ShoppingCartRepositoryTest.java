@@ -107,15 +107,16 @@ public class ShoppingCartRepositoryTest {
     @Sql(scripts = {
             "classpath:db-scripts/cart-items/clear-cart-items-table.sql",
             "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql",
-            "classpath:db-scripts/users/add-user-to-users.sql"
+            "classpath:db-scripts/users/clear-users-table.sql"
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test findByUserId() to find specific shopping cart with cart items")
     void findByUserId_existShoppingCart_shouldReturnShoppingCart() {
         Optional<ShoppingCart> actual = shoppingCartRepository.findByUserId(USER.getId());
         assertTrue(actual.isPresent());
-        assertEquals(SHOPPING_CART, actual.get());
-        assertEquals(SHOPPING_CART_ITEM_SET, actual.get().getCartItems());
+        ShoppingCart shoppingCart = actual.get();
+        assertEquals(SHOPPING_CART, shoppingCart);
+        assertEquals(SHOPPING_CART_ITEM_SET, shoppingCart.getCartItems());
     }
 
     @Test
@@ -123,13 +124,12 @@ public class ShoppingCartRepositoryTest {
             "classpath:db-scripts/books/add-dota-book-to-books.sql",
             "classpath:db-scripts/books/add-fiction-book-to-books.sql",
             "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql",
-            "classpath:db-scripts/cart-items/add-dota-cart-item-to-cart-items.sql",
-            "classpath:db-scripts/cart-items/add-fiction-cart-item-to-cart-items.sql",
             "classpath:db-scripts/users/add-user-to-users.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
             "classpath:db-scripts/cart-items/clear-cart-items-table.sql",
+            "classpath:db-scripts/users/clear-users-table.sql",
             "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql"
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
@@ -143,11 +143,17 @@ public class ShoppingCartRepositoryTest {
     }
 
     @Test
+    @Sql(scripts = {
+            "classpath:db-scripts/users/add-user-to-users.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(scripts = {
+            "classpath:db-scripts/users/clear-users-table.sql"
+    }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
     @DisplayName("Test findByUserId() to find non exist shopping cart")
     void findByUserId_nonExistShoppingCart_shouldReturnEmptyOptional() {
         Optional<ShoppingCart> actual = shoppingCartRepository.findByUserId(USER.getId());
-        assertTrue(actual.isPresent());
-        assertEquals(SHOPPING_CART, actual.get());
-        assertEquals(SHOPPING_CART_ITEM_SET, actual.get().getCartItems());
+        assertTrue(actual.isEmpty());
     }
 }
