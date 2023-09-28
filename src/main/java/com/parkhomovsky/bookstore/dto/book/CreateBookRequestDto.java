@@ -1,6 +1,7 @@
 package com.parkhomovsky.bookstore.dto.book;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Set;
@@ -11,22 +12,22 @@ import org.hibernate.validator.constraints.URL;
 
 @Data
 public class CreateBookRequestDto {
-    @NotNull(message = "Title cannot be null")
+    @NotNull(message = "Title cannot be absent")
     @Length(min = 2, max = 255, message = "Title must be between 2 and 255 characters")
     private String title;
-    @NotNull(message = "Author cannot be null")
+    @NotBlank(message = "Author cannot be empty")
     @Length(min = 2, max = 255, message = "Author must be between 2 and 255 characters")
     private String author;
-    @NotNull(message = "ISBN cannot be null")
+    @NotBlank(message = "ISBN cannot be empty")
     @ISBN(message = "Invalid ISBN format")
     private String isbn;
-    @NotNull(message = "Price cannot be null")
+    @NotBlank(message = "Price cannot be empty")
     @DecimalMin(value = "0.00", message = "Price must be greater than or equal to 0.00")
     private BigDecimal price;
     @Length(max = 1000, message = "Description must be less than or equal to 1000 characters")
     private String description;
     @URL(message = "Invalid URL format")
     private String coverImage;
-    @NotNull
+    @NotBlank(message = "At least one category id needed")
     private Set<Long> categoryId;
 }

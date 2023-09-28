@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: connect-order-and-order-items-tables
+      author: aleksandrparkhomovsky@gmail.com
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: order_items
+            baseColumnNames: order_id
+            referencedTableName: orders
+            referencedColumnNames: id
+            constraintName: FK_order_items_order

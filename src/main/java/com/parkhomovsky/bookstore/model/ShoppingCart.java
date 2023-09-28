@@ -12,6 +12,8 @@ import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -24,5 +26,7 @@ public class ShoppingCart {
     @OneToOne(optional = false)
     private User user;
     @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<CartItem> cartItems = new HashSet<>();
 }

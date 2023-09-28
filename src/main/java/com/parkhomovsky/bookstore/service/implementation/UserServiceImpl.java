@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public UserRegistrationResponseDto register(UserRegistrationRequestDto request)
             throws RegistrationException {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -40,9 +42,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetails getUser() {
+    public long getAuthenticatedUserId() {
+        return ((User) getAuthenticatedUserDetails()).getId();
+    }
+
+    @Override
+    public UserDetails getAuthenticatedUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
         return (UserDetails) principal;
+    }
+
+    @Override
+    public User getAuthenticatedUser() {
+        return (User) getAuthenticatedUserDetails();
     }
 }

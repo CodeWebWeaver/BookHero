@@ -6,7 +6,6 @@ import io.jsonwebtoken.JwtException;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.NonNull;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,93 +37,100 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         List<String> errors = ex.getBindingResult().getAllErrors().stream()
                 .map(this::getErrorMessage)
                 .toList();
-        errorResponse.setError(errors);
+        errorResponse.setValidationErrors(errors);
         return new ResponseEntity<>(errorResponse, headers, status);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleUniqueDataDuplicate(DataIntegrityViolationException ex) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "An error occurred while processing the request. "
-                + "You are attempting to add an item "
-                + "that violates a unique constraint in the database";
+    public ResponseEntity<ErrorResponseDto> handleUniqueDataDuplicate(
+            DataIntegrityViolationException ex) {
         ErrorResponseDto errorResponse =
-                getErrorMessageBody(errorMessage, rootCause, HttpStatus.CONFLICT);
+                getErrorMessageBody("An error occurred while processing the request. "
+                        + "You are attempting to add an item "
+                        + "that violates a unique constraint in the database: " + ex.getMessage(),
+                        HttpStatus.CONFLICT);
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({RegistrationException.class})
-    protected ResponseEntity<Object> handleRegistrationException(
+    protected ResponseEntity<ErrorResponseDto> handleRegistrationException(
             RegistrationException ex
     ) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "Entered wrong data for registration";
         ErrorResponseDto errorResponse =
-                getErrorMessageBody(errorMessage, rootCause, HttpStatus.BAD_REQUEST);
+                getErrorMessageBody("Entered wrong data for registration: "
+                                + ex.getMessage(),
+                        HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    protected ResponseEntity<Object> handleAccessDeniedException(
+    protected ResponseEntity<ErrorResponseDto> handleAccessDeniedException(
             AccessDeniedException ex
     ) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "User does not have access for this action";
         ErrorResponseDto errorResponse =
-                getErrorMessageBody(errorMessage, rootCause, HttpStatus.FORBIDDEN);
+                getErrorMessageBody("User does not have access for this action: "
+                                + ex.getMessage(),
+                        HttpStatus.FORBIDDEN);
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(JwtException.class)
-    protected ResponseEntity<Object> handleJwtException(JwtException ex) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "User not authenticated: Error during proceeding JWT";
+    protected ResponseEntity<ErrorResponseDto> handleJwtException(JwtException ex) {
         ErrorResponseDto errorResponse =
-                getErrorMessageBody(errorMessage, rootCause, HttpStatus.FORBIDDEN);
+                getErrorMessageBody("User not authenticated: Error during proceeding JWT: "
+                        + ex.getMessage(),
+                        HttpStatus.FORBIDDEN);
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    protected ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "User not authenticated: Wrong data entered";
+    protected ResponseEntity<ErrorResponseDto> handleBadCredentialsException(
+            BadCredentialsException ex) {
         ErrorResponseDto errorResponse =
-                getErrorMessageBody(errorMessage, rootCause, HttpStatus.FORBIDDEN);
+                getErrorMessageBody("User not authenticated: Wrong data entered: "
+                        + ex.getMessage(),
+                        HttpStatus.FORBIDDEN);
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(InvalidRequestParametersException.class)
-    public ResponseEntity<Object> handleInvalidRequestParametersException(
+    public ResponseEntity<ErrorResponseDto> handleInvalidRequestParametersException(
             InvalidRequestParametersException ex
     ) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "An error occurred while proceeding request data.";
         ErrorResponseDto errorResponse =
-                getErrorMessageBody(errorMessage, rootCause, HttpStatus.BAD_REQUEST);
+                getErrorMessageBody("An error occurred while proceeding request data: "
+                        + ex.getMessage(),
+                        HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Object> handleEntityNotFoundException(
+    public ResponseEntity<ErrorResponseDto> handleEntityNotFoundException(
             EntityNotFoundException ex
     ) {
-        Throwable rootCause = ExceptionUtils.getRootCause(ex);
-        String errorMessage = "An error occurred while proceeding data from database. "
-                + "Nothing found by provided parameters";
         ErrorResponseDto errorResponse =
-                getErrorMessageBody(errorMessage, rootCause, HttpStatus.BAD_REQUEST);
+                getErrorMessageBody("An error occurred while proceeding data from database. "
+                        + "Nothing found by provided parameters: "
+                        + ex.getMessage(),
+                        HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    private ErrorResponseDto getErrorMessageBody(String errorMessage,
-                                                    Throwable rootCause,
-                                                    HttpStatus httpStatus) {
-        if (rootCause != null) {
-            errorMessage = "Error: " + rootCause.getMessage();
-        }
+    @ExceptionHandler(EmptyShoppingCartException.class)
+    public ResponseEntity<ErrorResponseDto> handleEmptyShoppingCartException(
+            EmptyShoppingCartException ex
+    ) {
+        ErrorResponseDto errorResponse =
+                getErrorMessageBody("An error occurred while proceeding shopping cart data: "
+                        + ex.getMessage(),
+                        HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    private ErrorResponseDto getErrorMessageBody(String errorMessage, HttpStatus httpStatus) {
         ErrorResponseDto errorResponse = new ErrorResponseDto();
         errorResponse.setTimestamp(LocalDateTime.now());
-        errorResponse.setStatus(HttpStatus.CONFLICT);
+        errorResponse.setStatus(httpStatus);
         errorResponse.setError(errorMessage);
         return errorResponse;
     }

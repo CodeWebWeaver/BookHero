@@ -39,7 +39,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto update(Long id, CreateBookRequestDto bookRequestDto) {
-        Optional<Book> optionalBook = bookRepository.findByIdWithCategory(id);
+        Optional<Book> optionalBook = bookRepository.findById(id);
         if (optionalBook.isPresent()) {
             Book changedBook = bookMapper.toEntity(bookRequestDto);
             changedBook.setId(id);
@@ -55,7 +55,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto getById(Long id) {
-        Book book = bookRepository.findByIdWithCategory(id).orElseThrow(() ->
+        Book book = bookRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Can`t find any book with id: "
                         + id + " during getById"));
         return bookMapper.toDto(book);
@@ -76,7 +76,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDto> getAll(Pageable pageable) {
-        return bookRepository.findAllWithCategory(pageable).stream()
+        return bookRepository.findAll(pageable).stream()
                 .map(bookMapper::toDto)
                 .toList();
     }
@@ -89,7 +89,7 @@ public class BookServiceImpl implements BookService {
     }
 
     public Book getBookFromId(Long id) {
-        Optional<Book> bookById = bookRepository.findByIdWithCategory(id);
+        Optional<Book> bookById = bookRepository.findById(id);
         return bookById.orElseThrow(() ->
                 new EntityNotFoundException("Can`t find any book with id: "
                 + id + " during add cart item to cart"));
