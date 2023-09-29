@@ -15,6 +15,8 @@ Whether you're a book enthusiast, a developer looking for inspiration,
 or a team member interested in understanding this project,
 this README will guide you through the key aspects of this application.
 
+Link to Loom video about this project: [link](https://bit.ly/48B6FIo)
+
 ## Table of Contents
 
 - [Technologies and Tools](#technologies-and-tools)
