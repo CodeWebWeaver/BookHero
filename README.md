@@ -107,7 +107,7 @@ To deploy this application with Docker, follow these steps:
    docker compose build
 
 2. Run the container with the built image:
-
+    ```bash
     docker compose up
 
 Here, -p allows you to specify the port on which your application will be available.
@@ -115,12 +115,12 @@ Here, -p allows you to specify the port on which your application will be availa
 3. Your application is now accessible at http://localhost:8081.
 
 Additional Docker Commands
-To view a list of active containers, use:
+To view a list of active containers, use:\
+    `docker ps`
 
-    docker ps
-To stop a container, use:
+To stop a container, use:\
+    `docker stop bookstore`
 
-    docker stop bookstore
 After starting the application, you can access the API documentation and endpoints at 
 [Swagger Documentation](http://localhost:8081/api/swagger-ui/index.html).\
 Or [Postman](https://github.com/CodeWebWeaver/bookhero_postman_colletion).
