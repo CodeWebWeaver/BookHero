@@ -106,13 +106,13 @@ To deploy this application with Docker, follow these steps:
    ```bash
    docker compose build
 
-Run the container with the built image:
+2. Run the container with the built image:
 
     docker compose up
 
 Here, -p allows you to specify the port on which your application will be available.
 
-Your application is now accessible at http://localhost:8081.
+3. Your application is now accessible at http://localhost:8081.
 
 Additional Docker Commands
 To view a list of active containers, use:
@@ -130,9 +130,9 @@ Or [Postman](https://github.com/CodeWebWeaver/bookhero_postman_colletion).
 During the development of this project, encountered several challenges,
 including a circular dependency issue within the service layer.\
 After identifying the source of the problem, 
-code been refactored to utilize repositories instead of services within the service layer. 
+code been refactored to utilize repositories instead of services within the service layer.\
 While there was an option to resolve this by autowiring through setters,
-but using repositories provide significantly better performance.
+but using repositories improved the overall design and maintenance.
 
 ## Swagger Documentation
 
@@ -165,6 +165,7 @@ Set to jwt token to your environment:
 <span style="display: inline-block; border: 5px solid #30558a; border-radius: 25px; padding: 7px;">
 <img src="postman-login-auth-jwt.png" alt="Bookstore" style="border-radius: 10px; width: 400px">
 </span>
+
 Test different operations!
 
 
