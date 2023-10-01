@@ -15,10 +15,16 @@ public interface CartItemMapper {
     CartItemDto toDto(CartItem cartItem);
 
     @Mapping(target = "book", source = "bookId", qualifiedByName = "bookFromId")
+    @Mapping(target = "shoppingCart", ignore = true)
+    @Mapping(target = "id", ignore = true)
     CartItem toModel(CreateCartItemRequestDto createCartItemRequestDto);
 
+    @Mapping(target = "shoppingCart", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "book", ignore = true)
     CartItem toModel(AddCartItemRequestDto createCartItemRequestDto);
 
     @Mapping(target = "book", source = "bookId", qualifiedByName = "bookFromId")
+    @Mapping(target = "shoppingCart", ignore = true)
     CartItem toModel(CartItemDto cartItemDto);
 }

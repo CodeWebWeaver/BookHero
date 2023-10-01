@@ -32,7 +32,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto create(CreateBookRequestDto bookRequestDto) {
-        Book model = bookMapper.toEntity(bookRequestDto);
+        Book model = bookMapper.toModel(bookRequestDto);
         Book bookWithCategory = includeCategoryByIdInBook(model, bookRequestDto.getCategoryId());
         return bookMapper.toDto(bookRepository.save(bookWithCategory));
     }
@@ -41,7 +41,7 @@ public class BookServiceImpl implements BookService {
     public BookDto update(Long id, CreateBookRequestDto bookRequestDto) {
         Optional<Book> optionalBook = bookRepository.findById(id);
         if (optionalBook.isPresent()) {
-            Book changedBook = bookMapper.toEntity(bookRequestDto);
+            Book changedBook = bookMapper.toModel(bookRequestDto);
             changedBook.setId(id);
             Book bookWithCategory =
                     includeCategoryByIdInBook(changedBook, bookRequestDto.getCategoryId());
