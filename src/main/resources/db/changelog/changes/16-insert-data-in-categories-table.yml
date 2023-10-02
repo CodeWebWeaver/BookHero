@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-data-in-categories-table
+      author: aleksandrparkhomovsky@gmail.com
+      changes:
+        - insert:
+            tableName: categories
+            columns:
+              - column:
+                  name: name
+                  value: Fiction
+              - column:
+                  name: description
+                  value: "Fiction refers to literature created from the imagination. 
+                  Mysteries, science fiction, romance, fantasy, chick lit, 
+                  crime thrillers are all fiction genres."
+        - insert:
+            tableName: categories
+            columns:
+              - column:
+                  name: name
+                  value: Comedy
+              - column:
+                  name: description
+                  value: "Funny books that lead to make laughing of people"
