@@ -154,6 +154,7 @@ class BookServiceTest {
         when(bookRepository.save(CREATED_DOTA_BOOK)).thenReturn(CREATED_DOTA_BOOK);
         when(bookMapper.toDto(CREATED_DOTA_BOOK)).thenReturn(RESPONSE_CREATED_DOTA_BOOK_DTO);
         when(bookMapper.toDto(EXIST_TEST_BOOK)).thenReturn(RESPONSE_EXIST_TEST_BOOK_DTO);
+
         bookService.create(REQUEST_CREATE_DOTA_BOOK_DTO);
         Pageable pageable = PageRequest.of(0, 10);
         when(bookRepository.findAll(pageable)).thenReturn(new PageImpl<>(
@@ -169,6 +170,7 @@ class BookServiceTest {
                 .thenReturn(RESPONSE_EXIST_TEST_BOOK_DTO_WITHOUT_CATEGORIES);
         when(bookRepository.findAllByCategoryId(FICTION_CATEGORY
                 .getId())).thenReturn(List.of(EXIST_TEST_BOOK));
+
         List<BookDtoWithoutCategoryIds> actual =
                 bookService.getAllBooksByCategory(FICTION_CATEGORY.getId());
         assertEquals(ALL_FICTION_BOOKS_DTO, actual);

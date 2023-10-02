@@ -93,12 +93,12 @@ class BookControllerTest {
             .setCategoryId(Set.of(2L));
     private static final String ADD_COMEDY_CATEGORY =
             "classpath:db-scripts/categories/add-comedy-to-categories-table.sql";
-    private static final String CLEAR_BOOK_CATEGORIES_TABLES =
-            "classpath:db-scripts/clear-books_connections-tables.sql";
     private static final String ADD_FICTION_CATEGORY =
             "classpath:db-scripts/categories/add-fiction-to-categories-table.sql";
     private static final String ADD_FANTASY_CATEGORY =
             "classpath:db-scripts/categories/add-fantasy-to-categories-table.sql";
+    private static final String CLEAR_BOOK_CATEGORIES_TABLES =
+            "classpath:db-scripts/clear-books_connections-tables.sql";
     private static final String ADD_FICTION_BOOK =
             "classpath:db-scripts/books/add-fiction-book-to-books.sql";
     private static final String ADD_DOTA_BOOK =
