@@ -30,9 +30,10 @@ class CategoryServiceTest {
     private static final Category FICTION_CATEGORY = new Category()
             .setId(1L)
             .setName("Fiction")
-            .setDescription("Fiction refers to literature created from the imagination. \n"
-                    + "Mysteries, science fiction, romance, fantasy, chick lit, \n"
-                    + "crime thrillers are all fiction genres.");
+            .setDescription("""
+                    Fiction refers to literature created from the imagination.\s
+                    Mysteries, science fiction, romance, fantasy, chick lit,\s
+                    crime thrillers are all fiction genres.""");
     private static final Category COMEDY_CATEGORY = new Category()
             .setId(2L)
             .setName("Comedy")
@@ -40,9 +41,10 @@ class CategoryServiceTest {
     private static final Category DETECTIVE_CATEGORY = new Category()
             .setId(3L)
             .setName("Detective")
-            .setDescription("Detective fiction is a subgenre of crime fiction and mystery \n"
-                    + "fiction in which an investigator or a detective—whether professional, \n"
-                    + "amateur or retired—investigates a crime, often murder");
+            .setDescription("""
+                    Detective fiction is a subgenre of crime fiction and mystery\s
+                    fiction in which an investigator or a detective—whether professional,\s
+                    amateur or retired—investigates a crime, often murder""");
     private static final CategoryDto FICTION_CATEGORY_DTO = new CategoryDto()
             .setId(1L)
             .setName("Fiction")
@@ -54,15 +56,17 @@ class CategoryServiceTest {
     private static final CategoryDto DETECTIVE_CATEGORY_DTO = new CategoryDto()
             .setId(3L)
             .setName("Detective")
-            .setDescription("Detective fiction is a subgenre of crime fiction and mystery \n"
-                    + "fiction in which an investigator or a detective—whether professional, \n"
-                    + "amateur or retired—investigates a crime, often murder");
+            .setDescription("""
+                    Detective fiction is a subgenre of crime fiction and mystery\s
+                    fiction in which an investigator or a detective—whether professional,\s
+                    amateur or retired—investigates a crime, often murder""");
     private static final CategoryRequestDto DETECTIVE_CATEGORY_REQUEST_DTO =
             new CategoryRequestDto()
             .setName("Detective")
-            .setDescription("Detective fiction is a subgenre of crime fiction and mystery \n"
-                    + "fiction in which an investigator or a detective—whether professional, \n"
-                    + "amateur or retired—investigates a crime, often murder");
+            .setDescription("""
+                    Detective fiction is a subgenre of crime fiction and mystery\s
+                    fiction in which an investigator or a detective—whether professional,\s
+                    amateur or retired—investigates a crime, often murder""");
     private static final List<Category> CATEGORIES =
             List.of(FICTION_CATEGORY, COMEDY_CATEGORY);
     private static final List<CategoryDto> CATEGORIES_DTO =
