@@ -16,5 +16,8 @@ public interface OrderMapper {
     @Mapping(target = "userId", source = "user.id")
     StatusUpdateResponseDto toUpdateResponse(Order order);
 
+    @Mapping(target = "orderItems", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "shippingAddress", ignore = true)
     Order toModel(OrderDto order);
 }
