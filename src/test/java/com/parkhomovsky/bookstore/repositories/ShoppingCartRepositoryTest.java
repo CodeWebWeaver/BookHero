@@ -90,24 +90,45 @@ public class ShoppingCartRepositoryTest {
             .setId(1L)
             .setUser(USER)
             .setCartItems(new HashSet<>());
+    private static final String ADD_FICTION_BOOK =
+            "classpath:db-scripts/books/add-fiction-book-to-books.sql";
+    private static final String ADD_DOTA_BOOK =
+            "classpath:db-scripts/books/add-dota-book-to-books.sql";
+    private static final String ADD_USER_SHOPPING_CART =
+            "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql";
+    private static final String ADD_DOTA_CART_ITEM =
+            "classpath:db-scripts/cart-items/add-dota-cart-item-to-cart-items.sql";
+    private static final String ADD_FICTION_CART_ITEM =
+            "classpath:db-scripts/cart-items/add-fiction-cart-item-to-cart-items.sql";
+
+    private static final String CLEAR_CART_ITEMS_TABLE =
+            "classpath:db-scripts/cart-items/clear-cart-items-table.sql";
+    private static final String CLEAR_SHOPPING_CARTS_TABLE =
+            "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql";
+
+    private static final String ADD_USER_TO_TABLE =
+            "classpath:db-scripts/users/add-user-to-users-table.sql";
+
+    private static final String CLEAR_USERS_TABLE =
+            "classpath:db-scripts/users/clear-users-table.sql";
 
     @Autowired
     private ShoppingCartRepository shoppingCartRepository;
 
     @Test
     @Sql(scripts = {
-            "classpath:db-scripts/books/add-dota-book-to-books.sql",
-            "classpath:db-scripts/books/add-fiction-book-to-books.sql",
-            "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql",
-            "classpath:db-scripts/cart-items/add-dota-cart-item-to-cart-items.sql",
-            "classpath:db-scripts/cart-items/add-fiction-cart-item-to-cart-items.sql",
-            "classpath:db-scripts/users/add-user-to-users-table.sql"
+            ADD_DOTA_BOOK,
+            ADD_FICTION_BOOK,
+            ADD_USER_SHOPPING_CART,
+            ADD_DOTA_CART_ITEM,
+            ADD_FICTION_CART_ITEM,
+            ADD_USER_TO_TABLE
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
-            "classpath:db-scripts/cart-items/clear-cart-items-table.sql",
-            "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql",
-            "classpath:db-scripts/users/clear-users-table.sql"
+            CLEAR_CART_ITEMS_TABLE,
+            CLEAR_SHOPPING_CARTS_TABLE,
+            CLEAR_USERS_TABLE
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test findByUserId() to find specific shopping cart with cart items")
@@ -121,16 +142,16 @@ public class ShoppingCartRepositoryTest {
 
     @Test
     @Sql(scripts = {
-            "classpath:db-scripts/books/add-dota-book-to-books.sql",
-            "classpath:db-scripts/books/add-fiction-book-to-books.sql",
-            "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql",
-            "classpath:db-scripts/users/add-user-to-users-table.sql"
+            ADD_DOTA_BOOK,
+            ADD_FICTION_BOOK,
+            ADD_USER_SHOPPING_CART,
+            ADD_USER_TO_TABLE
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
-            "classpath:db-scripts/cart-items/clear-cart-items-table.sql",
-            "classpath:db-scripts/users/clear-users-table.sql",
-            "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql"
+            CLEAR_CART_ITEMS_TABLE,
+            CLEAR_SHOPPING_CARTS_TABLE,
+            CLEAR_USERS_TABLE
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test findByUserId() to find specific shopping cart with cart items")
@@ -144,11 +165,11 @@ public class ShoppingCartRepositoryTest {
 
     @Test
     @Sql(scripts = {
-            "classpath:db-scripts/users/add-user-to-users-table.sql"
+            ADD_USER_TO_TABLE
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
-            "classpath:db-scripts/users/clear-users-table.sql"
+            CLEAR_USERS_TABLE
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test findByUserId() to find non exist shopping cart")

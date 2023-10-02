@@ -88,22 +88,40 @@ public class CartItemsRepositoryTest {
             .setId(1L)
             .setUser(USER)
             .setCartItems(new HashSet<>());
+    private static final String CLEAR_BOOKS_RELATED_TABLES =
+            "classpath:db-scripts/clear-books_connections-tables.sql";
+    private static final String ADD_FICTION_BOOK =
+            "classpath:db-scripts/books/add-fiction-book-to-books.sql";
+    private static final String ADD_DOTA_BOOK =
+            "classpath:db-scripts/books/add-dota-book-to-books.sql";
+    private static final String ADD_USER_SHOPPING_CART =
+            "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql";
+    private static final String ADD_DOTA_CART_ITEM =
+            "classpath:db-scripts/cart-items/add-dota-cart-item-to-cart-items.sql";
+    private static final String ADD_FICTION_CART_ITEM =
+            "classpath:db-scripts/cart-items/add-fiction-cart-item-to-cart-items.sql";
+
+    private static final String CLEAR_CART_ITEMS_TABLE =
+            "classpath:db-scripts/cart-items/clear-cart-items-table.sql";
+    private static final String CLEAR_SHOPPING_CARTS_TABLE =
+            "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql";
 
     @Autowired
     private CartItemRepository cartItemRepository;
 
     @Test
     @Sql(scripts = {
-            "classpath:db-scripts/books/add-dota-book-to-books.sql",
-            "classpath:db-scripts/books/add-fiction-book-to-books.sql",
-            "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql",
-            "classpath:db-scripts/cart-items/add-dota-cart-item-to-cart-items.sql",
-            "classpath:db-scripts/cart-items/add-fiction-cart-item-to-cart-items.sql"
+            ADD_DOTA_BOOK,
+            ADD_FICTION_BOOK,
+            ADD_USER_SHOPPING_CART,
+            ADD_DOTA_CART_ITEM,
+            ADD_FICTION_CART_ITEM
             }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
-            "classpath:db-scripts/cart-items/clear-cart-items-table.sql",
-            "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql"
+            CLEAR_CART_ITEMS_TABLE,
+            CLEAR_SHOPPING_CARTS_TABLE,
+            CLEAR_BOOKS_RELATED_TABLES
             }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test findAllByShoppingCartId() to find all cartItems for specific shopping cart")
@@ -114,14 +132,15 @@ public class CartItemsRepositoryTest {
 
     @Test
     @Sql(scripts = {
-            "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql",
-            "classpath:db-scripts/cart-items/add-dota-cart-item-to-cart-items.sql",
-            "classpath:db-scripts/cart-items/add-fiction-cart-item-to-cart-items.sql"
+            ADD_USER_SHOPPING_CART,
+            ADD_DOTA_CART_ITEM,
+            ADD_FICTION_CART_ITEM
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
     @Sql(scripts = {
-            "classpath:db-scripts/cart-items/clear-cart-items-table.sql",
-            "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql"
+            CLEAR_CART_ITEMS_TABLE,
+            CLEAR_SHOPPING_CARTS_TABLE,
+            CLEAR_BOOKS_RELATED_TABLES
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test deleteAllByShoppingCartId()"
@@ -134,12 +153,11 @@ public class CartItemsRepositoryTest {
 
     @Test
     @Sql(scripts = {
-            "classpath:db-scripts/shopping-carts/add-user-shopping-cart-to-shopping-carts.sql"
+            ADD_USER_SHOPPING_CART
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
     )
-    @Sql(scripts = {
-            "classpath:db-scripts/shopping-carts/clear-shopping-cart-table.sql"
-    }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    @Sql(scripts = CLEAR_SHOPPING_CARTS_TABLE,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     @DisplayName("Test deleteAllByShoppingCartId() "
              + "to delete empty cartItems for specific shopping cart")
