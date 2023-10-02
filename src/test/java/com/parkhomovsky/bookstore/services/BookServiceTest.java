@@ -112,7 +112,7 @@ class BookServiceTest {
     @Test
     @DisplayName("Verify successful creating book with a valid input")
     public void create_validBookParameters_shouldReturnBookDto() {
-        when(bookMapper.toEntity(REQUEST_CREATE_DOTA_BOOK_DTO)).thenReturn(CREATED_DOTA_BOOK);
+        when(bookMapper.toModel(REQUEST_CREATE_DOTA_BOOK_DTO)).thenReturn(CREATED_DOTA_BOOK);
         when(bookRepository.save(CREATED_DOTA_BOOK)).thenReturn(CREATED_DOTA_BOOK);
         when(bookMapper.toDto(CREATED_DOTA_BOOK)).thenReturn(RESPONSE_CREATED_DOTA_BOOK_DTO);
 
@@ -150,7 +150,7 @@ class BookServiceTest {
     @Test
     @DisplayName("Verify all returned books with creating another one")
     public void getAll_validBookParams_shouldReturnListBookDto() {
-        when(bookMapper.toEntity(REQUEST_CREATE_DOTA_BOOK_DTO)).thenReturn(CREATED_DOTA_BOOK);
+        when(bookMapper.toModel(REQUEST_CREATE_DOTA_BOOK_DTO)).thenReturn(CREATED_DOTA_BOOK);
         when(bookRepository.save(CREATED_DOTA_BOOK)).thenReturn(CREATED_DOTA_BOOK);
         when(bookMapper.toDto(CREATED_DOTA_BOOK)).thenReturn(RESPONSE_CREATED_DOTA_BOOK_DTO);
         when(bookMapper.toDto(EXIST_TEST_BOOK)).thenReturn(RESPONSE_EXIST_TEST_BOOK_DTO);
