@@ -18,6 +18,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -29,6 +31,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {
     protected static MockMvc mockMvc;
     private static final int VALID_FANTASY_ID = 3;
@@ -55,13 +58,13 @@ class CategoryControllerTest {
                     .setDescription("Books about mystery worlds and unbelievable");
     private static final BookDtoWithoutCategoryIds RESPONSE_FICTION_BOOK_DTO_WITHOUT_CATEGORY_ID =
             new BookDtoWithoutCategoryIds()
-            .setId(1L)
-            .setTitle("Test Book")
-            .setAuthor("Test Author")
-            .setIsbn("1315616")
-            .setPrice(new BigDecimal("14.56"))
-            .setDescription("Test book description")
-            .setCoverImage("https://URL");
+                    .setId(1L)
+                    .setTitle("Test Book")
+                    .setAuthor("Test Author")
+                    .setIsbn("1315616")
+                    .setPrice(new BigDecimal("14.56"))
+                    .setDescription("Test book description")
+                    .setCoverImage("https://URL");
     private static final BookDtoWithoutCategoryIds RESPONSE_KOBZAR_BOOK_DTO_WITHOUT_CATEGORY_ID =
             new BookDtoWithoutCategoryIds()
             .setId(3L)

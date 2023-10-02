@@ -49,8 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails getAuthenticatedUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-        return (UserDetails) principal;
+        return (UserDetails) authentication.getPrincipal();
     }
 
     @Override
