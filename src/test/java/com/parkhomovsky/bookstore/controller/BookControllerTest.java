@@ -203,7 +203,7 @@ class BookControllerTest {
         assertTrue(allExpectedBooksFound, "Not all expected books were found in actual list.");
     }
 
-    @WithMockUser(username = "user")
+    //@WithMockUser(username = "user")
     @Test
     @Sql(
             scripts = {

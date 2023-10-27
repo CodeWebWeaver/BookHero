@@ -125,14 +125,6 @@ After starting the application, you can access the API documentation and endpoin
 [Swagger Documentation](http://localhost:8081/api/swagger-ui/index.html).\
 Or [Postman](https://github.com/CodeWebWeaver/bookhero_postman_colletion).
 
-## Challenges Faced
-
-During the development of this project, encountered several challenges,
-including a circular dependency issue within the service layer.\
-After identifying the source of the problem, 
-code been refactored to utilize repositories instead of services within the service layer.\
-While there was an option to resolve this by autowiring through setters,
-but using repositories improved the overall design and maintenance.
 
 ## Swagger Documentation
 
@@ -156,17 +148,26 @@ Import this collection to postman and explore different endpoints:
 
 Login after registration:\
 <span style="display: inline-block; border: 5px solid #30558a; border-radius: 25px; padding: 7px;">
-<img src="postman-login-instructions.png" alt="Bookstore" style="border-radius: 10px; width: 300px">
+<img src="postman-login-instructions.png" alt="Bookstore" style="border-radius: 10px; width: 600px">
 </span>
 
 
 Set to jwt token to your environment:
 
 <span style="display: inline-block; border: 5px solid #30558a; border-radius: 25px; padding: 7px;">
-<img src="postman-login-auth-jwt.png" alt="Bookstore" style="border-radius: 10px; width: 400px">
+<img src="postman-login-auth-jwt.png" alt="Bookstore" style="border-radius: 10px; width: 800px">
 </span>
 
 Test different operations!
+
+## Challenges Faced
+
+During the development of this project, encountered several challenges,
+including a circular dependency issue within the service layer.\
+After identifying the source of the problem,
+code been refactored to utilize repositories instead of services within the service layer.\
+While there was an option to resolve this by autowiring through setters,
+but using repositories improved the overall design and maintenance.
 
 
 ## Contributing
